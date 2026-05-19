@@ -1,0 +1,37 @@
+<ui version="4.0" >
+ <class>cbdam_window</class>
+ <widget class="QWidget" name="cbdam_window" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>695</width>
+    <height>532</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>CBDAMVIZ</string>
+  </property>
+  <layout class="QGridLayout" >
+   <property name="margin" >
+    <number>0</number>
+   </property>
+   <property name="spacing" >
+    <number>0</number>
+   </property>
+   <item row="0" column="0" >
+    <widget class="qgl_window_cbdam" native="1" name="qgl_window_ptr" />
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11" />
+ <customwidgets>
+  <customwidget>
+   <class>qgl_window_cbdam</class>
+   <extends>QWidget</extends>
+   <header>qgl_window_cbdam.hpp</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

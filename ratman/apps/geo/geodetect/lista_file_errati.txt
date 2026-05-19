@@ -1,0 +1,20 @@
+LAZIO
+nodo2 d1
+/usr/nodo2/d1/lazio/415140.tif *
+nodo3 d2
+/usr/nodo3/d2/lazio/386070.tif *
+/usr/nodo3/d2/lazio/399020.tif *
+nodo3 d4
+/usr/nodo3/d4/lazio/373100.tif *
+nodo4 d1
+/usr/nodo4/d1/lazio/399070.tif *
+
+
+CAMPANIA
+nodo1 d4
+/usr/nodo1/d4/campania/404060.tif *
+nodo2 d1
+/usr/nodo2/d1/campania/404070.tif *
+nodo2 d4
+/usr/nodo2/d4/campania/502110.tif *
+

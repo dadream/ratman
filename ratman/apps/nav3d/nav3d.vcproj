@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding = "Windows-1252"?>
+<VisualStudioProject
+	ProjectType="Visual C++"
+	Version="8,00"
+	Name="nav3d"
+	ProjectGUID="{DF09CD83-92D8-3FD1-A14A-74A3578689FC}"
+	Keyword="Qt4VSv1.0">
+	<Platforms>
+		<Platform
+			Name="Win32"/>
+	</Platforms>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="."
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			ConfigurationType="1"
+			IntermediateDirectory="debug\"
+			UseOfMfc="0">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;C:/Qt/4.1.1/include/QtCore&quot;,&quot;C:/Qt/4.1.1/include/QtNetwork&quot;,&quot;C:/Qt/4.1.1/include/QtGui&quot;,&quot;C:/Qt/4.1.1/include/QtOpenGL&quot;,&quot;C:/Qt/4.1.1/include/QtXml&quot;,&quot;C:/Qt/4.1.1/include&quot;,&quot;C:/Qt/4.1.1/include/ActiveQt&quot;,&quot;debug&quot;,&quot;.&quot;,C:/Qt/4.1.1/mkspecs/win32-msvc2005"
+				AdditionalOptions="-Zm200 -EHsc -w34100 -w34189 -Zm200 -EHsc -w34100 -w34189 -w34100 -w34189"
+				AssemblerListingLocation="debug\"
+				BufferSecurityCheck="false"
+				DebugInformationFormat="3"
+				ExceptionHandling="true"
+				GeneratePreprocessedFile="0"
+				ObjectFile="debug\"
+				Optimization ="4"
+				PreprocessorDefinitions="_WINDOWS,UNICODE,WIN32,QT_LARGEFILE_SUPPORT,QT_THREAD_SUPPORT,QT_DLL,QT_XML_LIB,QT_OPENGL_LIB,QT_GUI_LIB,QT_NETWORK_LIB,QT_CORE_LIB"
+				ProgramDataBaseFileName=".\"
+				RuntimeLibrary="3"
+				RuntimeTypeInfo="true"
+				SuppressStartupBanner="true"
+				TreatWChar_tAsBuiltInType="false"
+				WarningLevel="3"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="opengl32.lib glu32.lib gdi32.lib user32.lib C:\Qt\4.1.1\lib\qtmaind.lib C:\Qt\4.1.1\lib\QtXmld4.lib C:\Qt\4.1.1\lib\QtOpenGLd4.lib C:\Qt\4.1.1\lib\QtGuid4.lib C:\Qt\4.1.1\lib\QtNetworkd4.lib C:\Qt\4.1.1\lib\QtCored4.lib"
+				AdditionalLibraryDirectories="C:\Qt\4.1.1\lib"
+				GenerateDebugInformation="true"
+				IgnoreImportLibrary="true"
+				OutputFile="debug\nav3d.exe"
+				ProgramDatabaseFile=""
+				SubSystem="2"
+				SuppressStartupBanner="true"/>
+			<Tool
+				Name="VCMIDLTool"
+				DefaultCharType="0"
+				EnableErrorChecks="1"
+				WarningLevel="0"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_WINDOWS,UNICODE,WIN32,QT_LARGEFILE_SUPPORT,QT_THREAD_SUPPORT,QT_DLL,QT_XML_LIB,QT_OPENGL_LIB,QT_GUI_LIB,QT_NETWORK_LIB,QT_CORE_LIB"/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="."
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			ConfigurationType="1"
+			IntermediateDirectory="release\"
+			UseOfMfc="0">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalIncludeDirectories="&quot;C:/Qt/4.1.1/include/QtCore&quot;,&quot;C:/Qt/4.1.1/include/QtNetwork&quot;,&quot;C:/Qt/4.1.1/include/QtGui&quot;,&quot;C:/Qt/4.1.1/include/QtOpenGL&quot;,&quot;C:/Qt/4.1.1/include/QtXml&quot;,&quot;C:/Qt/4.1.1/include&quot;,&quot;C:/Qt/4.1.1/include/ActiveQt&quot;,&quot;release&quot;,&quot;.&quot;,C:/Qt/4.1.1/mkspecs/win32-msvc2005"
+				AdditionalOptions="-Zm200 -EHsc -w34100 -w34189 -Zm200 -EHsc -w34100 -w34189 -w34100 -w34189"
+				AssemblerListingLocation="release\"
+				BufferSecurityCheck="false"
+				DebugInformationFormat="0"
+				ExceptionHandling="true"
+				GeneratePreprocessedFile="0"
+				ObjectFile="release\"
+				Optimization ="2"
+				PreprocessorDefinitions="QT_NO_DEBUG,NDEBUG,_WINDOWS,UNICODE,WIN32,QT_LARGEFILE_SUPPORT,QT_THREAD_SUPPORT,QT_DLL,QT_NO_DEBUG,QT_XML_LIB,QT_OPENGL_LIB,QT_GUI_LIB,QT_NETWORK_LIB,QT_CORE_LIB,NDEBUG"
+				ProgramDataBaseFileName=".\"
+				RuntimeLibrary="2"
+				RuntimeTypeInfo="true"
+				SuppressStartupBanner="true"
+				TreatWChar_tAsBuiltInType="false"
+				WarningLevel="3"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="opengl32.lib glu32.lib gdi32.lib user32.lib C:\Qt\4.1.1\lib\qtmain.lib C:\Qt\4.1.1\lib\QtXml4.lib C:\Qt\4.1.1\lib\QtOpenGL4.lib C:\Qt\4.1.1\lib\QtGui4.lib C:\Qt\4.1.1\lib\QtNetwork4.lib C:\Qt\4.1.1\lib\QtCore4.lib"
+				AdditionalLibraryDirectories="C:\Qt\4.1.1\lib"
+				GenerateDebugInformation="false"
+				IgnoreImportLibrary="true"
+				LinkIncremental="2"
+				OutputFile="release\nav3d.exe"
+				ProgramDatabaseFile=""
+				SubSystem="2"
+				SuppressStartupBanner="true"/>
+			<Tool
+				Name="VCMIDLTool"
+				DefaultCharType="0"
+				EnableErrorChecks="1"
+				WarningLevel="0"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="QT_NO_DEBUG,NDEBUG,_WINDOWS,UNICODE,WIN32,QT_LARGEFILE_SUPPORT,QT_THREAD_SUPPORT,QT_DLL,QT_NO_DEBUG,QT_XML_LIB,QT_OPENGL_LIB,QT_GUI_LIB,QT_NETWORK_LIB,QT_CORE_LIB"/>
+		</Configuration>
+	</Configurations>
+	<Files>
+		<Filter
+			Name="Source Files"
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			<File
+				RelativePath="appwindow.cpp"/>
+			<File
+				RelativePath="main.cpp"/>
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File
+				RelativePath="appwindow.h">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						AdditionalDependencies="C:\Qt\4.1.1\bin\moc.exe"
+						CommandLine="C:\Qt\4.1.1\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_XML_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -I&quot;C:\Qt\4.1.1\include\QtCore&quot; -I&quot;C:\Qt\4.1.1\include\QtNetwork&quot; -I&quot;C:\Qt\4.1.1\include\QtGui&quot; -I&quot;C:\Qt\4.1.1\include\QtOpenGL&quot; -I&quot;C:\Qt\4.1.1\include\QtXml&quot; -I&quot;C:\Qt\4.1.1\include&quot; -I&quot;C:\Qt\4.1.1\include\ActiveQt&quot; -I&quot;debug&quot; -I&quot;.&quot; -IC:\Qt\4.1.1\mkspecs\win32-msvc2005 -D_MSC_VER=1400 -DWIN32 appwindow.h -o debug\moc_appwindow.cpp"
+						Description="MOC appwindow.h"
+						Outputs="debug\moc_appwindow.cpp"
+						Path="C:/Qt/4.1.1/bin"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						AdditionalDependencies="C:\Qt\4.1.1\bin\moc.exe"
+						CommandLine="C:\Qt\4.1.1\bin\moc.exe  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_THREAD_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_XML_LIB -DQT_OPENGL_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB -DQT_CORE_LIB -I&quot;C:\Qt\4.1.1\include\QtCore&quot; -I&quot;C:\Qt\4.1.1\include\QtNetwork&quot; -I&quot;C:\Qt\4.1.1\include\QtGui&quot; -I&quot;C:\Qt\4.1.1\include\QtOpenGL&quot; -I&quot;C:\Qt\4.1.1\include\QtXml&quot; -I&quot;C:\Qt\4.1.1\include&quot; -I&quot;C:\Qt\4.1.1\include\ActiveQt&quot; -I&quot;release&quot; -I&quot;.&quot; -IC:\Qt\4.1.1\mkspecs\win32-msvc2005 -D_MSC_VER=1400 -DWIN32 appwindow.h -o release\moc_appwindow.cpp"
+						Description="MOC appwindow.h"
+						Outputs="release\moc_appwindow.cpp"
+						Path="C:/Qt/4.1.1/bin"/>
+				</FileConfiguration>
+			</File>
+		</Filter>
+		<Filter
+			Name="Generated Files"
+			Filter="cpp;c;cxx;moc;h;def;odl;idl;res;"
+			UniqueIdentifier="{71ED8ED8-ACB9-4CE9-BBE1-E00B30144E11}">
+			<File
+				RelativePath="debug\moc_appwindow.cpp">
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"/>
+			</File>
+			<File
+				RelativePath="release\moc_appwindow.cpp">
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"/>
+			</File>
+			<File
+				RelativePath="debug\qrc_demo.cpp">
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"/>
+			</File>
+			<File
+				RelativePath="release\qrc_demo.cpp">
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"/>
+			</File>
+			<File
+				RelativePath="debug\qrc_resources.cpp">
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"/>
+			</File>
+			<File
+				RelativePath="release\qrc_resources.cpp">
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"/>
+			</File>
+			<File
+				RelativePath="ui_mainwindow.h"/>
+		</Filter>
+		<Filter
+			Name="Form Files"
+			Filter="ui"
+			UniqueIdentifier="{99349809-55BA-4b9d-BF79-8FDBB0286EB3}"
+			ParseFiles="false">
+			<File
+				RelativePath="mainwindow.ui">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						AdditionalDependencies="C:\Qt\4.1.1\bin\uic.exe"
+						CommandLine="C:\Qt\4.1.1\bin\uic.exe mainwindow.ui -o ui_mainwindow.h"
+						Description="UIC mainwindow.ui"
+						Outputs="ui_mainwindow.h"
+						Path="C:/Qt/4.1.1/bin"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						AdditionalDependencies="C:\Qt\4.1.1\bin\uic.exe"
+						CommandLine="C:\Qt\4.1.1\bin\uic.exe mainwindow.ui -o ui_mainwindow.h"
+						Description="UIC mainwindow.ui"
+						Outputs="ui_mainwindow.h"
+						Path="C:/Qt/4.1.1/bin"/>
+				</FileConfiguration>
+			</File>
+		</Filter>
+		<Filter
+			Name="Resource Files"
+			Filter="qrc;*"
+			UniqueIdentifier="{D9D6E242-F8AF-46E4-B9FD-80ECBC20BA3E}"
+			ParseFiles="false">
+			<File
+				RelativePath="..\graphics\4mori.png"/>
+			<File
+				RelativePath="..\graphics\arrowdown.png"/>
+			<File
+				RelativePath="..\graphics\arrowdown_pushed.png"/>
+			<File
+				RelativePath="..\graphics\arrowleft.png"/>
+			<File
+				RelativePath="..\graphics\arrowleft_pushed.png"/>
+			<File
+				RelativePath="..\graphics\arrowright.png"/>
+			<File
+				RelativePath="..\graphics\arrowright_pushed.png"/>
+			<File
+				RelativePath="..\graphics\arrowup.png"/>
+			<File
+				RelativePath="..\graphics\arrowup_pushed.png"/>
+			<File
+				RelativePath="..\graphics\demo\demo.qrc">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						AdditionalDependencies="..\graphics\demo\sardegnaridotta.png;..\graphics\demo\gennargentu.png;..\graphics\demo\mare1.png;C:\Qt\4.1.1\bin\rcc.exe"
+						CommandLine="C:\Qt\4.1.1\bin\rcc.exe -name demo ..\graphics\demo\demo.qrc -o debug\qrc_demo.cpp"
+						Description="RCC ../graphics/demo/demo.qrc"
+						Outputs="debug\qrc_demo.cpp"
+						Path="C:/Qt/4.1.1/bin"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						AdditionalDependencies="..\graphics\demo\sardegnaridotta.png;..\graphics\demo\gennargentu.png;..\graphics\demo\mare1.png;C:\Qt\4.1.1\bin\rcc.exe"
+						CommandLine="C:\Qt\4.1.1\bin\rcc.exe -name demo ..\graphics\demo\demo.qrc -o release\qrc_demo.cpp"
+						Description="RCC ../graphics/demo/demo.qrc"
+						Outputs="release\qrc_demo.cpp"
+						Path="C:/Qt/4.1.1/bin"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\graphics\demo\gennargentu.png"/>
+			<File
+				RelativePath="..\graphics\demo\mare1.png"/>
+			<File
+				RelativePath="..\graphics\resources.qrc">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						AdditionalDependencies="..\graphics\arrowleft.png;..\graphics\stop.png;..\graphics\stop_pushed.png;..\graphics\arrowup_pushed.png;..\graphics\arrowdown_pushed.png;..\graphics\arrowright_pushed.png;..\graphics\arrowleft_pushed.png;..\graphics\arrowright.png;..\graphics\arrowup.png;..\graphics\arrowdown.png;..\graphics\4mori.png;C:\Qt\4.1.1\bin\rcc.exe"
+						CommandLine="C:\Qt\4.1.1\bin\rcc.exe -name resources ..\graphics\resources.qrc -o debug\qrc_resources.cpp"
+						Description="RCC ../graphics/resources.qrc"
+						Outputs="debug\qrc_resources.cpp"
+						Path="C:/Qt/4.1.1/bin"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						AdditionalDependencies="..\graphics\arrowleft.png;..\graphics\stop.png;..\graphics\stop_pushed.png;..\graphics\arrowup_pushed.png;..\graphics\arrowdown_pushed.png;..\graphics\arrowright_pushed.png;..\graphics\arrowleft_pushed.png;..\graphics\arrowright.png;..\graphics\arrowup.png;..\graphics\arrowdown.png;..\graphics\4mori.png;C:\Qt\4.1.1\bin\rcc.exe"
+						CommandLine="C:\Qt\4.1.1\bin\rcc.exe -name resources ..\graphics\resources.qrc -o release\qrc_resources.cpp"
+						Description="RCC ../graphics/resources.qrc"
+						Outputs="release\qrc_resources.cpp"
+						Path="C:/Qt/4.1.1/bin"/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\graphics\demo\sardegnaridotta.png"/>
+			<File
+				RelativePath="..\graphics\stop.png"/>
+			<File
+				RelativePath="..\graphics\stop_pushed.png"/>
+		</Filter>
+	</Files>
+	<Globals>
+	</Globals>
+</VisualStudioProject>

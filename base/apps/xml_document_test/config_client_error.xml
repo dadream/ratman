@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE OpenTracker SYSTEM "opentracker.dtd">
+<OpenTracker>
+<configuration>
+</configuration>
+
+<Callbacks name="deviceHandler" DEF="tracker0">
+  <NetworkSource number="1" multicast-address="224.0.0.10" port="12345"/>
+</Callbacks>
+
+<Callback name="deviceHandler1" DEF="tracker1">
+  <NetworkSource number="1" multicast-address="224.0.0.10" port="12345"/>
+</Callback>
+
+</OpenTracker>

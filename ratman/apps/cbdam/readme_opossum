@@ -1,0 +1,56 @@
+		OPUSSUM library
+
+1) directory structure
+2) install
+3) applications
+
+
+1) directory structure:
+builder:	test application to build preprocessed terrain and building datasets
+                The test application uses qt for reading images (textures and 
+                heightfield) and libshp for reading building outlines. The
+                test application is here for demonstrating library features and
+                should be adapted and/or rewritten to handle large scale
+                datasets
+
+viewer:		test application to visualize preprocessed terrain and building
+                datasets. 
+
+lib:		all library files developed for the project and required to
+                link the applications.
+extra_lib:	external libs required to compile test applications. At this
+                point we only added libshp to read shapefiles in the builder
+
+opossum:	interface to access opossum library objects
+
+paris_img:	2 test images: one Paris heightfield and one Paris texture.
+		   - ps_paris_9k_uint8.png a one byte version of the paris heightfield.
+		   - paris_texture_1k.png a simplified version of the 36000x36000 paris texture.
+
+2) install: (qt is required!)
+
+% cd builder
+% qmake builder.pro
+% nmake
+% cd ../viewer
+% qmake viewer.pro
+% nmake
+
+3) applications:
+
+3.1) builder: build a texture tree starting from an image.
+  usage: opossum_builder [-height height-file-name] 
+                         [-color color-file-name] 
+                         [-buildings buildings-file-name] 
+                         [-output output-file-name]
+ Paris Example:
+    opossum_builder -height paris_9k_uint8.png -color paris_texture_1k.png -buildings Paris_build3D_all_PolygonZ.shp -output Paris
+
+3.2) opossum_viewer -height height-file-name [-color color-file-name] [-buildings buildings-file-name]
+
+  Paris Example:
+    opossum_viewer -height Paris.height [-color Paris.color] [-buildings Paris.buildings]
+ 
+Enjoy.
+
+-- The opossum team

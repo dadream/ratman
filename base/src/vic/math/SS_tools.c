@@ -1,0 +1,287 @@
+#include "SS.h"
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+
+#define DBL_MAX 	1.7976931348623158e+308 /* max value */
+
+#define M 714025
+#define IA 1366
+#define IC 150889
+
+float SSrandNum(SS *p)
+{
+	int j;
+
+	if(p->seed_reset==1)
+	{
+		p->seed_reset=0;
+		p->iff=0;
+	}
+
+	if (p->idum < 0 || p->iff == 0) {
+		p->iff=1;
+		if ((p->idum=(IC-(p->idum)) % M) < 0) p->idum = -(p->idum);
+		for (j=1;j<=97;j++) {
+			p->idum=(IA*(p->idum)+IC) % M;
+			p->ir[j]=(p->idum);
+		}
+		p->idum=(IA*(p->idum)+IC) % M;
+		p->iy=(p->idum);
+	}
+	j=(int)(1 + 97.0*(p->iy)/M);  
+
+	if (j > 97 || j < 1)
+		SSabort("Failure in random number generator");
+
+	p->iy=p->ir[j];
+	p->idum=(IA*(p->idum)+IC) % M;
+	p->ir[j]=(p->idum);
+
+	return (float) (p->iy)/M;
+}
+
+#undef M
+#undef IA
+#undef IC
+
+
+void SStry_add_RefSet1(SS *prob,double *sol)
+{
+	int i,j,worst_index;
+	double value,worst_value;
+
+	value=prob->evaluate(prob->userdata,sol);
+	if(prob->LS) SSimprove_solution(prob,sol,&value);
+
+	worst_index=prob->order1[prob->b1];
+	worst_value=prob->value1[worst_index];
+
+	if(SSis_new(prob,prob->RefSet1,prob->b1,sol) && value<worst_value)   
+	{
+		i=prob->b1;
+		while(i>=1 && value<prob->value1[prob->order1[i]])
+			i--;
+		i++;
+
+		/* Replace solution */
+		for(j=1;j<=prob->n_var;j++)
+			prob->RefSet1[worst_index][j]=sol[j];
+		prob->value1[worst_index]=value;
+		prob->iter1[worst_index]=prob->iter;
+
+		/* Update Order */
+		for(j=prob->b1;j>i;j--)
+			prob->order1[j]=prob->order1[j-1];
+		
+		prob->order1[i]=worst_index;
+		prob->new_elements=1;
+	}
+}
+	
+
+void SStry_add_RefSet2(SS *prob,double *sol)
+{
+	int i,j,worst_index;
+	double value,worst_value;
+
+	/* It should be noted that solutions are not improved
+	to increase the diversity in RefSet2 */
+
+	value=SSdistance_to_RefSet(prob,sol);
+
+	worst_index=prob->order2[prob->b2];
+	worst_value=prob->value2[worst_index];
+	
+	if(value>worst_value)
+	{
+		i=prob->b2;
+		while(i>=1 && value>prob->value2[prob->order2[i]])
+				i--;
+		i++;
+
+		/* Replace solution */
+		for(j=1;j<=prob->n_var;j++)
+			prob->RefSet2[prob->order2[prob->b2]][j]=sol[j];
+		prob->value2[worst_index]=value;
+		prob->iter2[worst_index]=prob->iter;
+
+		/* Update Order */
+		for(j=prob->b2;j>i;j--)
+			prob->order2[j]=prob->order2[j-1];
+		
+		prob->order2[i]=worst_index;
+		prob->new_elements=1;
+	}
+}
+
+void SScombine(SS *prob,double *x,double *y,double **offsprings,int number)
+{
+	int j;
+	double a,*d,r;
+
+	d=SSallocate_double_array(prob->n_var);
+	if(!d) SSabort("Memory allocation problem");
+
+	r = SSrandNum(prob);
+	for(j=1;j<=prob->n_var;j++)
+		d[j] = (y[j] - x[j]) / 2;
+	
+
+	/* Generate C2 */
+	for(j=1;j<=prob->n_var;j++)
+	{
+		offsprings[1][j] = x[j] + r*d[j];
+		if(offsprings[1][j]>prob->high[j]) offsprings[1][j]=prob->high[j];
+		if(offsprings[1][j]<prob->low[j])  offsprings[1][j]=prob->low[j];
+	}
+
+	if(number>=2) /* Generate C1 or C3 */
+	{
+		a =SSrandNum(prob);
+		for(j=1;j<=prob->n_var;j++)
+		{
+			if(a<=0.5)	offsprings[2][j] = x[j] - r*d[j];
+			else		offsprings[2][j] = y[j] + r*d[j];
+			if(offsprings[2][j]>prob->high[j]) offsprings[2][j]=prob->high[j];
+			if(offsprings[2][j]<prob->low[j])  offsprings[2][j]=prob->low[j];
+		}
+	}
+
+	if(number>=3) /* Generate the other one (C1 or C3) */
+	{
+		a =SSrandNum(prob);
+		for(j=1;j<=prob->n_var;j++)
+		{
+			if(a>0.5)	offsprings[3][j] = x[j] - r*d[j];
+			else		offsprings[3][j] = y[j] + r*d[j];
+			if(offsprings[3][j]>prob->high[j]) offsprings[3][j]=prob->high[j];
+			if(offsprings[3][j]<prob->low[j])  offsprings[3][j]=prob->low[j];
+		}
+	}
+
+	if(number==4) /* Generate another C2 */
+	{
+		r = SSrandNum(prob);
+		
+		for(j=1;j<=prob->n_var;j++)
+		{
+			offsprings[4][j] = x[j] + r*d[j];
+			if(offsprings[4][j]>prob->high[j]) offsprings[4][j]=prob->high[j];
+			if(offsprings[4][j]<prob->low[j])  offsprings[4][j]=prob->low[j];
+		}
+	}
+
+
+	free(d);
+}
+
+
+int SSis_new(SS *prob,double **solutions,int dim,double *sol)
+{
+	int i,j,is_new;
+	double precision=0;
+
+	precision=1/pow(10,prob->digits);
+
+	for(i=1;i<=dim;i++)
+	{
+		is_new=0;
+		for(j=1;j<=prob->n_var;j++)
+			if(fabs(solutions[i][j] - sol[j]) >= precision)
+				is_new=1;
+		if(is_new==0) return 0;
+	}
+	return 1;
+}
+
+
+double SSdistance_to_RefSet1(SS *prob,double *sol)
+{
+	double d,min_dist=DBL_MAX;
+	int a,j;
+
+	for(a=1;a<=prob->b1;a++)
+	{
+		d=0;
+		for(j=1;j<=prob->n_var;j++)
+			d += pow(sol[j]-prob->RefSet1[a][j],2);
+		if(min_dist> d)
+			min_dist=d;
+	}
+
+	return min_dist;
+}
+
+double SSdistance_to_RefSet(SS *prob,double *sol)
+{
+	double d,min_dist=DBL_MAX;
+	int a,j;
+
+	for(a=1;a<=prob->b1;a++)
+	{
+		d=0;
+		for(j=1;j<=prob->n_var;j++)
+			d += pow(sol[j]-prob->RefSet1[a][j],2);
+		if(min_dist> d)
+			min_dist=d;
+	}
+
+	for(a=1;a<=prob->b2;a++)
+	{
+		d=0;
+		for(j=1;j<=prob->n_var;j++)
+			d += pow(sol[j]-prob->RefSet2[a][j],2);
+		if(min_dist> d)
+			min_dist=d;
+	}
+
+	return min_dist;
+}
+
+
+int *SSorden_indices(double *pesos,int num,int tipo)
+{
+	int *indices,b,t,j,i,tempi;
+	double temp,*coste;
+	
+	coste=SSallocate_double_array(num);
+	indices=SSallocate_int_array(num);
+
+	for(i=1;i<=num;i++)
+	{
+		coste[i]=pesos[i];
+		indices[i]=i;
+	}
+	
+	b=num;
+	while(b!=0)
+	{   
+		t=0;              
+		for(j=1;j<=b-1;j++)
+		{
+			if( (tipo==1  && coste[j]<coste[j+1]) ||
+				(tipo==-1 && coste[j]>coste[j+1])    )
+			{
+				temp=coste[j+1];
+				coste[j+1]=coste[j];
+				coste[j]=temp;
+				
+				tempi=indices[j+1];
+				indices[j+1]=indices[j];
+				indices[j]=tempi;
+				
+				t=j;
+			}		
+		}
+		b=t;
+	}	
+	free(coste);
+	return indices;
+}
+
+void SSabort(char *texto)
+{
+	printf("%s",texto);
+	abort();
+}

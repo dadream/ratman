@@ -1,0 +1,247 @@
+
+INTRODUCTION
+----------------------------------
+
+RATMAN (Rapidly Adaptive Terrain Models Available on the Net) is a
+real-time terrain rendering framework able to asynchronously access
+terrain information from remote servers. It consists of a high
+performance portable rendering library used as a rendering engine, and
+of a simple networked viewer integrated with many different data
+sources.
+
+The terrain rendering technology behind RATMAN is based on a
+compressed multiresolution representation based on the BDAM (Batched
+Dynamic Adaptive Meshes) continuous level-of-detail framework. The
+structure combines the aggressive compression rates of wavelet-based
+image representations with the ability to ensure overall geometric
+continuity for variable resolution views of planar and spherical
+terrains with no need for run-time stitching. In RATMAN, the
+implementation has been simplified to ensure execution even on very
+low-end graphics platforms.
+
+RATMAN includes:
+- a system to build the geometric model of the terrain from 
+  DTM (digital elevation model)
+- a system to build image tiles (quads) from georeferenced image files
+- a prototype application (client) to explore geographical content from many 
+  different geocoded data sources (geographical maps, digital orthophotos, 
+  point-of-interest datasets).
+- Apache modules implementing the geometric data server and the tile
+  map server  
+
+Further information about the RATMAN framework is at the following URL:
+http://www.crs4.it/vic/cgi-bin/bib-page.cgi?id='Bettio:2007:HQN'
+
+
+HOW TO GET THE RELEASE
+----------------------------------
+
+RATMAN Open Source Edition: Download the .tar.gz archive from
+
+http://ratman.sourceforge.net
+
+
+DEPENDENCIES
+----------------------------------
+
+The current list of required software packages is as follows:
+
+* tinyxml
+     Homepage:            http://sourceforge.net/projects/tinyxml/
+     Description:         TinyXml is a simple, small, minimal, C++ XML parser  
+
+* qt4
+     Homepage:            http://www.trolltech.com/
+     Description:         The Qt4 toolkit is a comprehensive C++ application
+                          development framework.
+
+* lam-mpi or openmpi
+     Homepage:            http://www.lam-mpi.org
+                          http://www.open-mpi.org
+     Description:         A high-performance message passing library (MPI)
+
+* giflib [**]
+     Homepage:            http://sourceforge.net/projects/giflib/
+     Description:         Library to handle, display and manipulate GIF images
+
+* proj
+     Homepage:            http://trac.osgeo.org/proj/
+     Description:         Proj.4 cartographic projection software with 
+                          updated NAD27 grids
+
+* libgeotiff [**]
+     Homepage:            http://www.remotesensing.org/geotiff/geotiff.html
+     Description:         Library for reading TIFF files with embedded tags
+                          for geographic (cartographic) information
+
+* gdal
+     Homepage:            http://www.gdal.org/
+     Description:         GDAL is a translator library for raster geospatial
+                          data formats (includes OGR support)
+
+* shapelib
+     Homepage:            http://shapelib.maptools.org/
+     Description:         library for manipulating ESRI Shapefiles
+
+* glew
+     Homepage:            http://glew.sourceforge.net
+     Description:         The OpenGL Extension Wrangler Library
+
+* curl
+     Homepage:            http://curl.haxx.se/ http://curl.planetmirror.com
+     Description:         A Client that groks URLs
+
+* sl
+     Homepage:            http://spacelib.sourceforge.net/
+     Description:         CRS4 Spaceland library
+
+* apache (optionally, necessary only to install the RATMAN servers)
+     Homepage:            http://httpd.apache.org/
+     Description:         The Apache Web Server.
+
+[**] Only required for certain linux distros otherwise already 
+     included in GDAL.
+
+
+HOW TO INSTALL RATMAN (Builders and Viewer)
+-------------------------------------------
+
+1. Unpack the archive if you have not done so already
+   cd /tmp
+   tar zxvf ratman.tar.gz
+   cd ratman
+   There are 3 directories:
+   - qmakeconfig
+   - base
+   - ratman
+
+2. Install some configuration file necessary for compilation
+
+   cd /tmp/ratman/qmakeconfig
+   qmake
+   make 
+   sudo make install   
+   cd ..
+
+3. Install some basic library
+   cd  /tmp/ratman/base
+   qmake
+   make
+   sudo make install
+   cd ..
+
+4. Compile ratman
+   cd /tmp/ratman/ratman
+   qmake
+   make
+
+
+HOW TO TEST RATMAN
+----------------------------------
+
+Enter the prototype directory:
+
+cd /tmp/ratman/ratman/apps/nav3d
+
+Run
+
+./vic_ratman_nav3d --home_url test_config.xml
+
+
+
+HOW TO INSTALL RATMAN (Apache modules)
+-------------------------------------------
+
+Install Apache (2.0) on your server machine and configure it.
+
+Here Apache is supposed to be installed in /etc/apache2.
+We install all the modules in /etc/apache2/modules.d.
+In order to perfectly load the modules, you must check
+that the /etc/apache2/httpd.conf file contains the following
+lines at the end:
+
+# We Include extra .conf files from /etc/apache2/modules.d
+#
+Include /etc/apache2/modules.d/*.conf
+
+
+1. Installing apache_mod_vicrepo 
+
+   cd /tmp/ratman/apache_mod_vicrepo
+   make 
+   sudo make install   
+
+2. Installing apache_mod_victms
+
+   cd /tmp/ratman/apache_mod_victms
+   make standalone
+   make
+   sudo make install   
+
+Run Apache daemon.
+
+HOW TO TEST RATMAN (Apache modules)
+-------------------------------------------
+
+It is possible to check if the modules are working 
+via a web browser.
+
+
+***apache_mod_vicrepo
+---------------------
+
+Visit: http://<your server>/vicrepo/test.vicrepo?debug=1
+
+If everything is ok something similar to the following message
+will be displayed:
+
+----------------------------------
+
+CRS4 VicRepo Apache mod debug output
+
+Server pid   = 13441
+
+unparsed_uri = /vicrepo/test.vicrepo?debug=1
+uri          = /vicrepo/test.vicrepo
+filename     = /var/www/localhost/htdocs/vicrepo/test.vicrepo
+path_info    = 
+args         = debug=1
+
+hostname     = <TCP/IP ADDRESS>
+
+
+dataset      = /var/www/localhost/htdocs/vicrepo/test.vicrepo
+i            = 0
+j            = 0
+k            = 0
+debug        = 1
+
+Open connections:
+  [0] /var/www/localhost/htdocs/vicrepo/cbdam-srtm-v2-global-geodetic/
+       srtm_europe.root
+
+----------------------------------
+
+
+
+***apache_mod_victms
+---------------------
+
+Visit: http://<your server>/victms
+
+If everything is ok something similar to the following message
+will be displayed:
+
+----------------------------------
+
+<Services>
+  <TileMapService title="VICTMS server" version="1.0.0" 
+   href="http://<your server>/victms/1.0.0/"/>
+</Services>
+
+----------------------------------
+
+
+
+Enjoy it!
+The RATMAN Staff

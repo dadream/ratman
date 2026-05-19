@@ -1,0 +1,19 @@
+# C++ 编译输出目录
+Release/
+Debug/
+build/
+bin/
+obj/
+out/
+
+# 静态库 / 动态库
+*.a
+*.o
+*.so
+*.so.*
+*.dylib
+*.lib
+*.dll
+*.pdb
+
+*/vic_geo_raster_quadtree_builder

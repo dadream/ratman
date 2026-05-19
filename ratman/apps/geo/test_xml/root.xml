@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+ <Services>
+   <TileMapService title="Example Tile Map Service" version="1.0.0" href="http://tms.osgeo.org/1.0.0/" />
+   <TileMapService title="New Example Tile Map Service" version="1.1.0" href="http://tms.osgeo.org/1.1.0/" />
+   <FancyFeatureService title="Features!" version="0.9" href="http://ffs.osgeo.org/0.9/" />
+ </Services>

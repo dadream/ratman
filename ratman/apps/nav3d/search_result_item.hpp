@@ -1,0 +1,57 @@
+//+++HDR+++
+//======================================================================
+//   This file is part of the RATMAN software framework.
+//   Copyright (C) 2009 by CRS4, Pula, Italy.
+//
+//   For more information, visit the CRS4 Visual Computing Group
+//   web pages at http://www.crs4.it/vic/
+//
+//   This file may be used under the terms of the GNU General Public
+//   License as published by the Free Software Foundation and appearing
+//   in the file LICENSE included in the packaging of this file.
+//
+//   CRS4 reserves all rights not expressly granted herein.
+//  
+//   This file is provided AS IS with NO WARRANTY OF ANY KIND, 
+//   INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS 
+//   FOR A PARTICULAR PURPOSE.
+//
+//======================================================================
+//---HDR---//
+#ifndef SEARCH_RESULT_ITEM_HPP
+#define SEARCH_RESULT_ITEM_HPP
+
+#include <QTreeWidgetItem>
+
+/**
+ * Item (text element) of the search_result_dialog.
+ * A search operation returns a set of items each of them
+ * represents a location with the relative engine.
+ * See search_result_dialog to see how they are used.
+ */ 
+class search_result_item : public QTreeWidgetItem {
+
+protected:
+  
+  std::size_t engine_;
+  std::size_t entry_;
+
+public:
+
+  search_result_item(std::size_t engine,
+		     std::size_t entry,
+		     QTreeWidgetItem *parent,
+		     int type=Type);
+
+  inline std::size_t engine() const {
+    return engine_;
+  }
+
+  inline std::size_t entry() const {
+    return entry_;
+  }
+
+};
+
+#endif
+

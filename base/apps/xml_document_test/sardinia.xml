@@ -1,0 +1,68 @@
+<ratman version="1.0">
+  <terrain id="sardinia 1m">
+    <elevation fname="/data1/cbdam/data/sardinia1m/height_sardinia_amax_tol1_sub0_alpha0.75"
+    copyright="Elevazione: DTM Regione Sardegna"></elevation> 
+    <color fname="/data1/cbdam/data/sardinia1m/color_sardinia_amax_tol5_sub1_alpha0.75"
+    copyright="Immagini: TerraItaly(c) Compagnia Generale di Riprese Aeree S.p.A. Parma"></color>
+    <projection proj="+proj=tmerc +lat_0=0 +lon_0=9 +ellps=intl +x_0=1230 +y_0=-4437510 +k_0=0.9996"></projection>
+  </terrain>
+
+  <group id="Luoghi abitati" active="1" priority="1">
+    <placenames 
+       id="Regioni Amministrative" 
+       fname="/data1/cbdam/data/sardinia1m/sardinia_placenames_administrative_region.txt" 
+       label_size="24.0" 
+       label_color="154 12 15"
+       placemark_dmin="25000.0" 
+       placemark_dmax="500000.0" 
+       icon="/data1/cbdam/data/sardinia1m/gov_icon.png"
+    ></placenames>
+    <placenames 
+       id="Aree urbane" 
+       fname="/data1/cbdam/data/sardinia1m/sardinia_placenames_populated_places.txt" 
+       label_size="18.0" 
+       label_color="255 204 0" 
+       placemark_dmin="100.0" 
+       placemark_dmax="35000.0"
+       icon="/data1/cbdam/data/sardinia1m/town_icon.png"
+    ></placenames>
+  </group>
+  <group id="Geografia" active="1" priority="2">
+    <placenames 
+       id="Monti" 
+       fname="/data1/cbdam/data/sardinia1m/sardinia_placenames_hypsographic.txt" 
+       label_size="14.0" 
+       label_color="244 96 34" 
+       placemark_dmin="100.0" 
+       placemark_dmax="50000.0" 
+       icon="/data1/cbdam/data/sardinia1m/mountain_icon.png"
+    ></placenames>
+    <placenames 
+       id="Coste, Fiumi e Laghi" 
+       fname="/data1/cbdam/data/sardinia1m/sardinia_placenames_hydrographic.txt" 
+       label_size="14.0" 
+       label_color="0 255 255" 
+       placemark_dmin="100.0" 
+       placemark_dmax="35000.0" 
+       icon="/data1/cbdam/data/sardinia1m/water_icon.png"
+    ></placenames>
+  </group>
+  <group id="Immagini" active="1" priority="3">
+    <geophotos 
+       id="Esempio" 
+       fname="/data1/cbdam/data/sardinia1m/sardinia_geophotos.txt"
+       placemark_dmin="100.0" 
+       placemark_dmax="75000.0" 
+       icon="/data1/cbdam/data/sardinia1m/geophoto_icon.png"
+    ></geophotos>
+  </group>
+  <group id="Meteo" active="1" priority="3">
+    <meteo
+       id="Dati meteorologici" 
+       fname="/data1/cbdam/data/sardinia1m/sardinia_meteo.txt"
+       placemark_dmin="100.0" 
+       placemark_dmax="750000.0" 
+       icon="/data1/cbdam/data/sardinia1m/meteo_icon.png"
+    ></meteo>
+  </group>
+</ratman>

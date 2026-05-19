@@ -1,0 +1,16 @@
+<HEAD>
+  <FIGLIO sesso="M">
+    <NOME REDDITO="123.45" AUTO="6">Carlo</NOME>
+    <DESCRIZIONE>Carlo e' povero</DESCRIZIONE>
+  </FIGLIO>
+  <FIGLIO sesso="F">
+    <NOME REDDITO="8987656" AUTO="30">Carla</NOME>
+    <DESCRIZIONE>Carla e' ricca</DESCRIZIONE>
+    <DESCRIZIONE>
+      <NUMERO>123.45</NUMERO>
+      Carla e' bona
+      <NUMERO>1234</NUMERO>
+      Carla e' brava
+    </DESCRIZIONE>
+  </FIGLIO>
+</HEAD>

@@ -1,0 +1,519 @@
+<ui version="4.0" >
+ <class>Dialog</class>
+ <widget class="QDialog" name="Dialog" >
+  <property name="geometry" >
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>496</width>
+    <height>270</height>
+   </rect>
+  </property>
+  <property name="windowTitle" >
+   <string>Sky Parameters</string>
+  </property>
+  <property name="windowIcon" >
+   <iconset>graphics/configure.png</iconset>
+  </property>
+  <layout class="QVBoxLayout" >
+   <property name="margin" >
+    <number>9</number>
+   </property>
+   <property name="spacing" >
+    <number>6</number>
+   </property>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label" >
+       <property name="text" >
+        <string>Sun Azimuth</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="AzimuthSlider" >
+       <property name="focusPolicy" >
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="maximum" >
+        <number>360</number>
+       </property>
+       <property name="value" >
+        <number>90</number>
+       </property>
+       <property name="sliderPosition" >
+        <number>90</number>
+       </property>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="tickPosition" >
+        <enum>QSlider::NoTicks</enum>
+       </property>
+       <property name="tickInterval" >
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLCDNumber" name="emissionNumber" >
+       <property name="value" stdset="0" >
+        <double>90.000000000000000</double>
+       </property>
+       <property name="intValue" stdset="0" >
+        <number>90</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_2" >
+       <property name="text" >
+        <string>Sun Zenith</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="AltitudeSlider" >
+       <property name="focusPolicy" >
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="minimum" >
+        <number>1</number>
+       </property>
+       <property name="maximum" >
+        <number>90</number>
+       </property>
+       <property name="value" >
+        <number>5</number>
+       </property>
+       <property name="sliderPosition" >
+        <number>5</number>
+       </property>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLCDNumber" name="lcdNumber" >
+       <property name="value" stdset="0" >
+        <double>5.000000000000000</double>
+       </property>
+       <property name="intValue" stdset="0" >
+        <number>5</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_3" >
+       <property name="text" >
+        <string>Air Turbidity</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="TurbiditySlider" >
+       <property name="focusPolicy" >
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="minimum" >
+        <number>2</number>
+       </property>
+       <property name="maximum" >
+        <number>12</number>
+       </property>
+       <property name="value" >
+        <number>2</number>
+       </property>
+       <property name="sliderPosition" >
+        <number>2</number>
+       </property>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLCDNumber" name="lcdNumber_2" >
+       <property name="value" stdset="0" >
+        <double>2.000000000000000</double>
+       </property>
+       <property name="intValue" stdset="0" >
+        <number>2</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_4" >
+       <property name="text" >
+        <string>Day Time Hours</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="TimeSlider" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+       <property name="focusPolicy" >
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="minimum" >
+        <number>0</number>
+       </property>
+       <property name="maximum" >
+        <number>24</number>
+       </property>
+       <property name="value" >
+        <number>12</number>
+       </property>
+       <property name="sliderPosition" >
+        <number>12</number>
+       </property>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="tickPosition" >
+        <enum>QSlider::NoTicks</enum>
+       </property>
+       <property name="tickInterval" >
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLCDNumber" name="lcdTime" >
+       <property name="smallDecimalPoint" >
+        <bool>false</bool>
+       </property>
+       <property name="value" stdset="0" >
+        <double>12.000000000000000</double>
+       </property>
+       <property name="intValue" stdset="0" >
+        <number>12</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_5" >
+       <property name="text" >
+        <string>Day Time Minutes</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="TimeSlider_2" >
+       <property name="enabled" >
+        <bool>false</bool>
+       </property>
+       <property name="focusPolicy" >
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="minimum" >
+        <number>0</number>
+       </property>
+       <property name="maximum" >
+        <number>60</number>
+       </property>
+       <property name="value" >
+        <number>30</number>
+       </property>
+       <property name="sliderPosition" >
+        <number>30</number>
+       </property>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="tickPosition" >
+        <enum>QSlider::NoTicks</enum>
+       </property>
+       <property name="tickInterval" >
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLCDNumber" name="lcdTime_2" >
+       <property name="smallDecimalPoint" >
+        <bool>false</bool>
+       </property>
+       <property name="value" stdset="0" >
+        <double>30.000000000000000</double>
+       </property>
+       <property name="intValue" stdset="0" >
+        <number>30</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QDateEdit" name="dateEdit" />
+     </item>
+     <item>
+      <spacer>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QCheckBox" name="RealTimeButton" >
+       <property name="focusPolicy" >
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="text" >
+        <string>Real Time and Location Sky</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" >
+     <property name="margin" >
+      <number>0</number>
+     </property>
+     <property name="spacing" >
+      <number>6</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="label_6" >
+       <property name="sizePolicy" >
+        <sizepolicy>
+         <hsizetype>0</hsizetype>
+         <vsizetype>5</vsizetype>
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize" >
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="text" >
+        <string>Lens Effect</string>
+       </property>
+       <property name="margin" >
+        <number>0</number>
+       </property>
+       <property name="indent" >
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QSlider" name="FovSlider" >
+       <property name="focusPolicy" >
+        <enum>Qt::NoFocus</enum>
+       </property>
+       <property name="minimum" >
+        <number>20</number>
+       </property>
+       <property name="maximum" >
+        <number>120</number>
+       </property>
+       <property name="value" >
+        <number>30</number>
+       </property>
+       <property name="sliderPosition" >
+        <number>30</number>
+       </property>
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="tickPosition" >
+        <enum>QSlider::NoTicks</enum>
+       </property>
+       <property name="tickInterval" >
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_7" >
+       <property name="text" >
+        <string>Y FOV</string>
+       </property>
+       <property name="alignment" >
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLCDNumber" name="fovNumber" >
+       <property name="value" stdset="0" >
+        <double>30.000000000000000</double>
+       </property>
+       <property name="intValue" stdset="0" >
+        <number>30</number>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>AzimuthSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>emissionNumber</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>254</x>
+     <y>33</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>485</x>
+     <y>33</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>AltitudeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>350</x>
+     <y>81</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>485</x>
+     <y>63</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TurbiditySlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdNumber_2</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>350</x>
+     <y>111</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>485</x>
+     <y>93</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>FovSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>fovNumber</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>285</x>
+     <y>240</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>485</x>
+     <y>240</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TimeSlider_2</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdTime_2</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>286</x>
+     <y>166</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>425</x>
+     <y>161</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TimeSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>lcdTime</receiver>
+   <slot>display(int)</slot>
+   <hints>
+    <hint type="sourcelabel" >
+     <x>293</x>
+     <y>127</y>
+    </hint>
+    <hint type="destinationlabel" >
+     <x>440</x>
+     <y>137</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

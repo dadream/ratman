@@ -1,0 +1,52 @@
+!contains(CONFIG,debug) {
+  DEFINES *= NDEBUG
+}
+
+release {
+   BUILD_SUBDIR=Release
+}
+
+!release {
+   BUILD_SUBDIR=Debug
+} 
+
+OBJECTS_DIR=$$BUILD_SUBDIR
+MOC_DIR=$$BUILD_SUBDIR
+UI_DIR=$$BUILD_SUBDIR
+UI_HEADERS_DIR=$$BUILD_SUBDIR
+UI_SOURCES_DIR=$$BUILD_SUBDIR
+
+TEMPLATE 	= app
+
+QT		+= qt3support
+CONFIG          = warn_on release thread incremental opengl qt extension
+CONFIG		-= staticlib
+unix:CONFIG     += system-png system-zlib
+win32:CONFIG	+= console
+
+FORMS 		= 
+
+HEADERS 	= 
+
+SOURCES 	= opossum_builder.cpp
+
+!release:TARGET	= opossum_builder_dbg
+release:TARGET	= opossum_builder
+
+unix:INCLUDEPATH 	+= /usr/local/Cg/include
+win32:INCLUDEPATH 	+= $(CG_INC_PATH) 
+INCLUDEPATH     += ../extra/include
+INCLUDEPATH 	+=  . .. 
+
+win32 {
+LIBS 		+= ../lib/vic_opossum.lib ../lib/vic_opossum_buildings.lib ../lib/vic_cbdam_base.lib ../lib/vic_os.lib ../lib/vic_vfs.lib ../lib/vic_curlstream.lib ../lib/vic_xml.lib ../lib/libsl.a ../extra/lib/libcurl.lib ../extra/lib/shapelib.lib
+LIBS            += wsock32.lib winmm.lib ws2_32.lib 
+#LIBS		+= ../extra/lib/glew32.lib ../extra/lib/glut32.lib
+}
+
+
+unix {
+LIBS 		+= -L../lib -lvic_opossum -lvic_opossum_buildings -lvic_cbdam_base  -lvic_os -lvic_vfs -lvic_curlstream  -lvic_xml -lsl -llibcurl
+ -lshapelib
+}
+

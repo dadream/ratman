@@ -1,0 +1,30 @@
+	
+
+
+struct appdata
+{
+float4 position : POSITION;
+float4 color	: COLOR0;
+};
+struct vfconn
+{
+	float4 HPos	: POSITION;
+	float4 Col0	: COLOR0;
+};
+
+vfconn lightwave_main(appdata IN,	uniform float4x4 ModelViewProj)
+{
+	vfconn OUT;			// Variable to handle our output from the vertex
+					// shader (goes to a fragment shader if available).
+
+	// Transform The Vertex Position Into Homogenous Clip-Space (Required)
+	OUT.HPos = mul(ModelViewProj, IN.position);
+
+	float fHeight = IN.position.z;
+
+	OUT.Col0.z = (0.331*exp(-IN.position.z))*exp(1.0);
+	OUT.Col0.y = (0.135*exp(-IN.position.z))*exp(1.0);
+	OUT.Col0.x = (0.058*exp(-IN.position.z))*exp(1.0);
+	
+	return OUT;
+}
