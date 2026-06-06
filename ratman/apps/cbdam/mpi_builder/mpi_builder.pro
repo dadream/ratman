@@ -33,7 +33,7 @@ win32:CONFIG+= console
 HEADERS=
 SOURCES= cbdam_mpi_builder.cpp
 
-INCLUDEPATH += /wksp/include
+INCLUDEPATH += $$PREFIX/include
 
 TARGET=vic_cbdam_mpi_builder
 

@@ -25,9 +25,11 @@
 #endif
 
 #include <vic/cbdam/base/terrain_model_renderer.hpp>
-#include <vic/cbdam/base/progress_bar.hpp>
 #include <sl/clock.hpp>
-#include <GL/glew.h>
+
+#ifndef CBDAM_NO_OPENGL
+#include <vic/cbdam/base/opengl_cached_data_renderer.hpp>
+#endif
 
 #ifdef _WIN32
 #undef min
@@ -38,6 +40,24 @@ namespace cbdam {
 
   terrain_model_renderer::terrain_model_renderer(terrain_model* tm) :
     terrain_model_(tm) {
+#ifndef CBDAM_NO_OPENGL
+    cached_data_renderer_ = new opengl_cached_data_renderer();
+    owns_renderer_ = true;
+#else
+    cached_data_renderer_ = 0;
+    owns_renderer_ = false;
+#endif
+    focus_fraction_ = 1.0;
+    screen_tolerance_ = 0.1;
+    wireframe_enabled_ = false;
+    draw_bounding_volumes_enabled_ = false;
+    is_opengl_supported_ = false;
+    adaptive_tolerance_enabled_ = true;
+    current_center_ = point3d_t(0.0, 0.0, 0.0);
+  }
+
+  terrain_model_renderer::terrain_model_renderer(terrain_model* tm, cached_data_renderer* r) :
+    terrain_model_(tm), cached_data_renderer_(r), owns_renderer_(false) {
     focus_fraction_ = 1.0;
     screen_tolerance_ = 0.1;
     wireframe_enabled_ = false;
@@ -48,7 +68,9 @@ namespace cbdam {
   }
 
   terrain_model_renderer::~terrain_model_renderer() {
-    
+    if (owns_renderer_) {
+      delete cached_data_renderer_;
+    }
   }
 
   //opengl_cached_data_renderer::rendering_mode_t terrain_model_renderer::gl_rendering_mode() const {
@@ -57,17 +79,18 @@ namespace cbdam {
 
   
   void terrain_model_renderer::init_opengl() {
-    opengl_cached_data_renderer_.set_projection_parameters(terrain_model_->uvh_xyz_transform());
-    opengl_cached_data_renderer_.set_vbo_parameters(terrain_model_->height_patch_dim(),
+    cached_data_renderer_->set_projection_parameters(terrain_model_->uvh_xyz_transform());
+    cached_data_renderer_->set_vbo_parameters(terrain_model_->height_patch_dim(),
                                                     terrain_model_->texture_quad_width());
-    opengl_cached_data_renderer_.init_opengl();
-    is_opengl_supported_ = (opengl_cached_data_renderer_.gl_rendering_mode() != 
-			    opengl_cached_data_renderer::RENDERING_MODE_NONE);
+    cached_data_renderer_->init_opengl();
+    
+    is_opengl_supported_ = cached_data_renderer_ && cached_data_renderer_->is_supported();
 
     std::pair<float, float> h_range = terrain_model_->estimated_elevation_range();
     double height_scale = terrain_model_->height_scale_factor();
     if (height_scale == 0) height_scale = 1.0;
-    opengl_cached_data_renderer_.set_elevation_range(0, h_range.second / height_scale);
+    cached_data_renderer_->set_height_scale_factor(height_scale);
+    cached_data_renderer_->set_elevation_range(0, h_range.second / height_scale);
   }
 
   void terrain_model_renderer::draw(const projective_map_t& P, 
@@ -116,9 +139,17 @@ namespace cbdam {
       stat_visibility_time = stat_clock.elapsed().as_milliseconds();
 
       stat_clock.restart();
+      cached_data_renderer_->set_matrices(P, V, draw_origin);
+      cached_data_renderer_->set_rendering_pass(cached_data_renderer::PASS_FILL);
       draw_begin();
       draw_diamonds(cut, is_cut_diamond_visible);
-      draw_diamonds_wireframe(cut, is_cut_diamond_visible);
+      
+      if (wireframe_enabled_) {
+        cached_data_renderer_->set_rendering_pass(cached_data_renderer::PASS_WIREFRAME);
+        draw_begin();
+        draw_diamonds(cut, is_cut_diamond_visible);
+      }
+      
       draw_overlays(cut, is_cut_diamond_visible);
       draw_end();
       stat_draw_time = stat_clock.elapsed().as_milliseconds();
@@ -157,133 +188,52 @@ namespace cbdam {
   }
 
   void terrain_model_renderer::draw_begin() {
-    // gl&co
-    glPushAttrib(GL_ALL_ATTRIB_BITS);
-    glEnable(GL_DEPTH_TEST);
-    glShadeModel(GL_SMOOTH);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CW);
-    
-    // FIXME
-    glEnable(GL_COLOR_MATERIAL);
-    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE); 
-
-    if (wireframe_enabled_) {
-      glEnable(GL_POLYGON_OFFSET_FILL);
-      glPolygonOffset(1.0f, 4.0f);
-    } else {
-      glColor3f( 1.0, 1.0, 1.0 );
-      glDisable(GL_POLYGON_OFFSET_FILL);
-    }
-
-    bool elevation_map_enabled = opengl_cached_data_renderer_.elevation_map_enabled();
-
-    const point4_t surface_color = 
-      (elevation_map_enabled || opengl_cached_data_renderer_.use_color()) ? point4_t(1.0f,1.0f,1.0f, 1.0f) : point4_t(0.87f, 0.73f, 0.58f, 1.0f);
-
-    opengl_cached_data_renderer_.frame_initialize(surface_color);
+    cached_data_renderer_->draw_begin();
   }
 
   void terrain_model_renderer::draw_end() {
-    //    opengl_cached_data_renderer_.frame_finalize(); // MOVED BEFORE draw_overlays
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-    glPopAttrib();
- }
+    cached_data_renderer_->draw_end();
+  }
 
   void terrain_model_renderer::draw_diamonds(const diamond_data_map_t& cut,
                                              const std::vector<bool>& is_cut_diamond_visible) {
     uint32_t count = 0;
+    bool use_color = cached_data_renderer_->use_color();
     grid_point_t previous_texture_level_xy(-1,-1,-1);
-    bool use_color = opengl_cached_data_renderer_.use_color();
-    vector3d_t previous_offset(1e+30,-1e+29,1e+28); // something strange for initialization
-    //    std::cerr << "------------------------- NEW FRAME ----------------------------------------" << std::endl;
-    glMatrixMode(GL_TEXTURE);
-    glPushMatrix();
-    glMatrixMode(GL_MODELVIEW);
-    glPushMatrix();
-
-    sl::matrix4f VM;
-    glGetFloatv(GL_MODELVIEW_MATRIX, VM.to_pointer());
 
     for(diamond_data_map_t::const_iterator it = cut.begin(); it != cut.end(); ++it) {
       if (is_cut_diamond_visible[count]) {
 	if (use_color) {
 	  grid_point_t current_texture_level_xy = it->second->texture_level_xy();
-	  //	  std::cerr << "current_texture_level_xy " << current_texture_level_xy << std::endl;
 	  if (current_texture_level_xy != previous_texture_level_xy &&
 	      it->second->texture_image() != 0) {
-	    opengl_cached_data_renderer_.bind_texture(it->second);
+	    cached_data_renderer_->bind_texture(it->second);
 	    previous_texture_level_xy = current_texture_level_xy;
 	  }
-	  glMatrixMode(GL_TEXTURE);
-	  glLoadMatrixd(it->second->texture_matrix().to_pointer());
-	  glMatrixMode(GL_MODELVIEW);
 	}
-	
-	// local draw
-	const vector3d_t diamond_offset = it->second->vertices()->diamond_center() - current_center_;
-	if (previous_offset != diamond_offset) {
-	  previous_offset = diamond_offset;
-	  sl::matrix4f VM_prime = VM;
-	  VM_prime *= sl::matrix4f(1.0f, 0.0f, 0.0f, diamond_offset[0],
-				   0.0f, 1.0f, 0.0f, diamond_offset[1],
-				   0.0f, 0.0f, 1.0f, diamond_offset[2],
-				   0.0f, 0.0f, 0.0f, 1.0f);
- 
-	  glLoadMatrixf(VM_prime.to_pointer());
-	}
-        opengl_cached_data_renderer_.render(it->first, it->second);
+        cached_data_renderer_->render(it->first, it->second);
       }
       ++count;
     }
-
-    glPopMatrix();
-    glMatrixMode(GL_TEXTURE);
-    glPopMatrix();
-    glMatrixMode(GL_MODELVIEW);
   }
 
-  void terrain_model_renderer::draw_diamonds_wireframe(const diamond_data_map_t& cut,
-                                                       const std::vector<bool>& is_cut_diamond_visible) {
-    if (wireframe_enabled_) {
-      bool elevation_map_enabled = opengl_cached_data_renderer_.elevation_map_enabled();
-      if (elevation_map_enabled) opengl_cached_data_renderer_.set_elevation_map_enabled(false);
-
-      // set wireframe color
-      glDisable(GL_POLYGON_OFFSET_FILL); 
-      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-      
-      static const point4_t line_color(0.0f, 0.0f, 0.0f, 1.0f);
-      opengl_cached_data_renderer_.frame_initialize(line_color);
-
-      bool patch_color_enabled = opengl_cached_data_renderer_.patch_color_enabled();
-      if (patch_color_enabled) opengl_cached_data_renderer_.patch_color_enabled() = false;
-
-      draw_diamonds(cut, is_cut_diamond_visible);
-      if (patch_color_enabled) opengl_cached_data_renderer_.patch_color_enabled() = true;     
-      if (elevation_map_enabled) opengl_cached_data_renderer_.set_elevation_map_enabled(true); 
-    }
+  void terrain_model_renderer::draw_diamonds_wireframe(const diamond_data_map_t& /*cut*/,
+                                                       const std::vector<bool>& /*is_cut_diamond_visible*/) {
+    // No-op: handled directly in draw() pass switches
   }
 
   void terrain_model_renderer::draw_overlays(const diamond_data_map_t& cut,
                                              const std::vector<bool>& is_cut_diamond_visible) {
-    // disbale all opengl texture/vbos settings
-    opengl_cached_data_renderer_.frame_finalize();
+    cached_data_renderer_->frame_finalize();
 
     if (draw_bounding_volumes_enabled_) {
-      glColor3f( 1.0, 1.0, 1.0 );
       draw_bounding_volumes(cut, is_cut_diamond_visible);
     }
 
     float dmf = 1.0f - terrain_model_->data_missing_fraction();
-    if (dmf<0) dmf = 0;
+    if (dmf < 0) dmf = 0;
     if (dmf < 0.9999) {
-      const bool is_vertical = false;
-      const bool look3d = true;
-      //      progress_bar pb(0.83, 0.96, 0.16, is_vertical, look3d);
-      progress_bar pb(is_vertical, look3d); // fixed length and positioning.
-      pb.draw(dmf);
+      cached_data_renderer_->draw_progress_bar(dmf);
     }
   }
 
@@ -300,71 +250,7 @@ namespace cbdam {
   }
   
   void terrain_model_renderer::draw_bounding_volume(const bounding_volume_t& bvol) const {
-    const point3d_t p000 = bvol.box_space_corner(0);
-    const point3d_t p111 = bvol.box_space_corner(7);
-    glPushMatrix();
-
-    glTranslated(-current_center_[0], -current_center_[1], -current_center_[2]);
-    glMultMatrixd(bvol.from_box_space_map().as_matrix().to_pointer());
-    {
-      glColor3f(1.0f, 0.0f, 0.0f);
-      glLineWidth(2);
-      glBegin(GL_LINES);
-      glVertex3f(0.5f*(p000[0]+p111[0]), 0.5f*(p000[1]+p111[1]), p000[2]);
-      glVertex3f(0.5f*(p000[0]+p111[0]), 0.5f*(p000[1]+p111[1]), p111[2]);
-      glEnd();
-
-      glColor3f(1.0f, 1.0f, 1.0f);
-      glLineWidth(1);
-      glBegin(GL_LINE_LOOP);
-      glNormal3f( 0,0,-1 );
-      glVertex3f(p111[0], p000[1], p000[2]);
-      glVertex3f(p000[0], p000[1], p000[2]);
-      glVertex3f(p000[0], p111[1], p000[2]);
-      glVertex3f(p111[0], p111[1], p000[2]);
-      glEnd();
-
-      glBegin(GL_LINE_LOOP);
-      glNormal3f( 0,1,0 );
-      glVertex3f(p111[0], p111[1], p000[2]);
-      glVertex3f(p000[0], p111[1], p000[2]);
-      glVertex3f(p000[0], p111[1], p111[2]);
-      glVertex3f(p111[0], p111[1], p111[2]);
-      glEnd();
-
-      glBegin(GL_LINE_LOOP);
-      glNormal3f( 0,0,1 );
-      glVertex3f(p111[0], p111[1], p111[2]);
-      glVertex3f(p000[0], p111[1], p111[2]);
-      glVertex3f(p000[0], p000[1], p111[2]);
-      glVertex3f(p111[0], p000[1], p111[2]);
-      glEnd();
-
-      glBegin(GL_LINE_LOOP);
-      glNormal3f( 0,-1,0 );
-      glVertex3f(p111[0], p000[1], p111[2]);
-      glVertex3f(p000[0], p000[1], p111[2]);
-      glVertex3f(p000[0], p000[1], p000[2]);
-      glVertex3f(p111[0], p000[1], p000[2]);
-      glEnd();
-
-      glBegin(GL_LINE_LOOP);
-      glNormal3f( -1,0,0 );
-      glVertex3f(p000[0], p000[1], p000[2]);
-      glVertex3f(p000[0], p000[1], p111[2]);
-      glVertex3f(p000[0], p111[1], p111[2]);
-      glVertex3f(p000[0], p111[1], p000[2]);
-      glEnd();
-
-      glBegin(GL_LINE_LOOP);
-      glNormal3f( -1,0,0 );
-      glVertex3f(p111[0], p000[1], p000[2]);
-      glVertex3f(p111[0], p111[1], p000[2]);
-      glVertex3f(p111[0], p111[1], p111[2]);
-      glVertex3f(p111[0], p000[1], p111[2]);
-      glEnd();
-    }
-    glPopMatrix();
+    cached_data_renderer_->draw_bounding_volume(bvol, current_center_);
   }
   
   void terrain_model_renderer::set_wireframe_enabled(bool x) {
@@ -376,11 +262,11 @@ namespace cbdam {
   }
 
   void terrain_model_renderer::set_draw_enabled(bool x) {
-    opengl_cached_data_renderer_.draw_enabled() = x;
+    cached_data_renderer_->set_draw_enabled(x);
   }
 
   bool terrain_model_renderer::is_draw_enabled() const {
-    return opengl_cached_data_renderer_.draw_enabled();
+    return cached_data_renderer_->draw_enabled();
   }
 
   void terrain_model_renderer::set_focus_fraction(float x) {
@@ -396,35 +282,35 @@ namespace cbdam {
   }
 
   void terrain_model_renderer::set_patch_color_enabled(bool x) {
-    opengl_cached_data_renderer_.patch_color_enabled() = x;
+    cached_data_renderer_->set_patch_color_enabled(x);
   }
 
   bool terrain_model_renderer::is_patch_color_enabled() const {
-    return opengl_cached_data_renderer_.patch_color_enabled();
+    return cached_data_renderer_->patch_color_enabled();
   }
 
   void terrain_model_renderer::set_elevation_map_enabled(bool x) {
-    opengl_cached_data_renderer_.set_elevation_map_enabled(x);
+    cached_data_renderer_->set_elevation_map_enabled(x);
   }
 
   void terrain_model_renderer::set_color_enabled(bool x) {
-    opengl_cached_data_renderer_.set_use_color(x);
+    cached_data_renderer_->set_use_color(x);
   }
 
   bool terrain_model_renderer::is_color_enabled() const {
-    return opengl_cached_data_renderer_.use_color();
+    return cached_data_renderer_->use_color();
   }
 
   void terrain_model_renderer::set_shading_enabled(bool x) {
-    opengl_cached_data_renderer_.set_use_normal(x);
+    cached_data_renderer_->set_use_normal(x);
   }
 
   bool terrain_model_renderer::is_shading_enabled() const {
-    return opengl_cached_data_renderer_.use_normal();
+    return cached_data_renderer_->use_normal();
   }
 
   bool terrain_model_renderer::is_elevation_map_enabled() const {
-    return opengl_cached_data_renderer_.elevation_map_enabled();
+    return cached_data_renderer_->elevation_map_enabled();
   }
 
   void terrain_model_renderer::set_draw_bounding_volumes_enabled(bool x) {
@@ -436,15 +322,15 @@ namespace cbdam {
   }
 
   void terrain_model_renderer::set_geometry_cache_capacity(uint32_t x) {
-    opengl_cached_data_renderer_.vbo_cache_capacity() = x;
+    cached_data_renderer_->set_vbo_cache_capacity(x);
   }
 
   void terrain_model_renderer::set_texture_cache_capacity(uint32_t x_bytes) {
-    opengl_cached_data_renderer_.set_texture_cache_capacity(x_bytes);
+    cached_data_renderer_->set_texture_cache_capacity(x_bytes);
   }
 
   void terrain_model_renderer::release_graphics() {
-    opengl_cached_data_renderer_.clear();
+    cached_data_renderer_->clear();
   } 
 
   void terrain_model_renderer::set_adaptive_tolerance_enabled(bool x) {
@@ -463,7 +349,7 @@ namespace cbdam {
   }
 
   void terrain_model_renderer::clear_texture_cache() {
-    opengl_cached_data_renderer_.clear_texture_cache();
+    cached_data_renderer_->clear_texture_cache();
   }
 
 } // namespace cbdam 

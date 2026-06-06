@@ -25,6 +25,8 @@ include (base_pre.pri)
 TEMPLATE = subdirs 
 SUBDIRS  = src apps
 
+apps.depends = src
+
 #--------------------------------------------------------------------
 include (base_post.pri)
 #--------------------------------------------------------------------

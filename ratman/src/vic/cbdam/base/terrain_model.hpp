@@ -34,7 +34,7 @@
 #include <sl/rigid_body_map.hpp> 
 #include <sl/projective_map.hpp>
 #include <sl/oriented_box.hpp>
-#include <QMutex>
+#include <mutex>
 
 namespace cbdam {
 
@@ -75,9 +75,9 @@ namespace cbdam {
     typedef vic::geo::srs::spatial_reference_transformation spatial_reference_transformation_t;
 
   protected:
-    mutable QMutex              representation_mutex_;
-    mutable QMutex              layers_mutex_;
-    mutable QMutex              parameters_mutex_;
+    mutable std::recursive_mutex representation_mutex_;
+    mutable std::recursive_mutex layers_mutex_;
+    mutable std::recursive_mutex parameters_mutex_;
 
     terrain_model_thread*       update_thread_;
 

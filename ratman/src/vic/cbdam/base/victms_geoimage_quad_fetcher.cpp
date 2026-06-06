@@ -20,7 +20,10 @@
 //---HDR---//
 #include <vic/cbdam/base/victms_geoimage_quad_fetcher.hpp>
 #include <vic/geo/base/victms_conventions.hpp>
+#include <vic/geo/base/tilemap_config.hpp>
+#include <vic/xml/document.hpp>
 #include <vic/curlstream/curlstream.hpp>
+#include <sstream>
 
 #ifdef _WIN32
   #undef max
@@ -154,6 +157,53 @@ namespace cbdam {
       } else {
 	SL_TRACE_OUT(1) << "xml: " << xml << std::endl;	
 
+	std::cerr << "[DEBUG] http_connect: XML read:\n" << xml << std::endl;
+	if (xml.find("<victms>") != std::string::npos) {
+	  std::cerr << "[DEBUG] http_connect: found <victms>" << std::endl;
+	  // Translate victms.xml to TileMap XML
+	  std::istringstream in(xml);
+	  vic::xml::document doc;
+	  doc.parse(in);
+	  std::cerr << "[DEBUG] http_connect: doc error: " << (doc.error() ? "YES" : "NO") << " msg: " << doc.error_msg() << std::endl;
+	  vic::xml::node_iterator root = doc.first_root("victms");
+	  std::cerr << "[DEBUG] http_connect: root tag: " << (root.is_null() ? "NULL" : root.tag()) << std::endl;
+	  if (!root.is_null()) {
+	    for (vic::xml::node_iterator it = root.down(); !it.is_null(); it = it.next()) {
+	      std::cerr << "[DEBUG] http_connect: child tag: " << it.tag() << std::endl;
+	      if (it.tag() == "tilemap") {
+		vic::geo::base::tilemap_config tc;
+		if (tc.parse(it)) {
+		  std::cerr << "[DEBUG] http_connect: successfully parsed tilemap_config name=" << tc.name() << std::endl;
+		  std::ostringstream out;
+		  std::string tileset_url = base_url();
+		  // Strip filename (victms.xml) from tileset_url to get base path
+		  size_t last_slash = tileset_url.find_last_of('/');
+		  if (last_slash != std::string::npos) {
+		    tileset_url = tileset_url.substr(0, last_slash + 1);
+		  } else {
+		    tileset_url = "";
+		  }
+		  out << "<TileMap version=\"1.0.0\" tilemapservice=\"local\">" << std::endl;
+		  out << "  <Title>" << tc.name() << "</Title>" << std::endl;
+		  out << "  <Abstract>VICTMS server: TileMap Resource for " << tc.name() << "</Abstract>" << std::endl;
+		  out << "  <SRS>" << tc.srs() << "</SRS>" << std::endl;
+		  out << "  <BoundingBox minx=\"" << tc.bbox_lo(0) << "\" miny=\"" << tc.bbox_lo(1) << "\" maxx=\"" << tc.bbox_hi(0) << "\" maxy=\"" << tc.bbox_hi(1) << "\" />" << std::endl;
+		  out << "  <Origin x=\"" << tc.bbox_lo(0) << "\" y=\"" << tc.bbox_lo(1) << "\" />" << std::endl;
+		  out << "  <TileFormat width=\"" << tc.img_width() << "\" height=\"" << tc.img_height() << "\" mime-type=\"" << tc.mime() << "\" extension=\"" << tc.extension() << "\" />" << std::endl;
+		  out << "  <TileSets profile=\"" << tc.profile() << "\">" << std::endl;
+		  for (int l = 0; l <= tc.max_level(); ++l) {
+		    out << "    <TileSet href=\"" << tileset_url << l << "/\" units-per-pixel=\"" << tc.units_per_pixel(l) << "\" order=\"" << l << "\" />" << std::endl;
+		  }
+		  out << "  </TileSets>" << std::endl;
+		  out << "</TileMap>" << std::endl;
+		  xml = out.str();
+		  break;
+		}
+	      }
+	    }
+	  }
+	}
+
 	tilemap_resource_ = new vic::geo::base::tms_tilemap_resource(xml);
 	
 	// FIXME: Check SRS, etc.
@@ -181,16 +231,40 @@ namespace cbdam {
       "key_from_box = [" << kk[0] << " " << kk[1] << " " << kk[2] << "]" << std::endl <<
       "box = (" << uv_box[0][0] << " " << uv_box[0][1] << ")(" << uv_box[1][0] << " " << uv_box[1][1] << std::endl;
 
-    std::string result = base_url();
-    result += "/";
-    result += sl::to_string(kk[0]);
-    result += "/";
-    result += sl::to_string(kk[1]);
-    result += "/";
-    result += sl::to_string(kk[2]);
-    result += ".";
-    result += tilemap_resource_->img_extension();
-    return result;
+    std::string base = base_url();
+    size_t last_slash = base.find_last_of('/');
+    if (last_slash != std::string::npos) {
+      base = base.substr(0, last_slash); // Strip filename (e.g. victms.xml)
+    }
+
+    std::string ext = tilemap_resource_->img_extension();
+
+    // Check if it is a local file or local URL
+    bool is_local = true;
+    if (base.find("http://") == 0 || base.find("https://") == 0) {
+      is_local = false;
+    }
+
+    if (is_local) {
+      // For local files/URLs, we must use the padded victms directory structure conventions
+      std::string path = vic::geo::base::victms_conventions::quad_filename(base, kk[0], kk[1], kk[2], ext);
+      if (path.find("file://") != 0 && path.find("/") == 0) {
+        path = "file://" + path;
+      }
+      return path;
+    } else {
+      // For remote HTTP servers, use standard TMS URL format
+      std::string result = base;
+      result += "/";
+      result += sl::to_string(kk[0]);
+      result += "/";
+      result += sl::to_string(kk[1]);
+      result += "/";
+      result += sl::to_string(kk[2]);
+      result += ".";
+      result += ext;
+      return result;
+    }
   }
 
 } // namespace cbdam

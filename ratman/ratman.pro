@@ -25,6 +25,8 @@ include (ratman_pre.pri)
 TEMPLATE = subdirs 
 SUBDIRS  = src apps 
 
+apps.depends = src 
+
 #--------------------------------------------------------------------
 include (ratman_post.pri)
 #--------------------------------------------------------------------

@@ -19,13 +19,16 @@
 #======================================================================
 #---HDR---#
 vic_vfs {
+  isEmpty(RATMAN_BUILD_DIR) {
+    RATMAN_BUILD_DIR = $$RATMAN_DIR
+  }
   win32 {
-    PRE_TARGETDEPS += $$RATMAN_DIR/src/vic/vfs/$$BUILD_SUBDIR/vic_vfs$${TARGET_SUFFIX}.lib
-    LIBS += $$RATMAN_DIR/src/vic/vfs/$$BUILD_SUBDIR/vic_vfs$${TARGET_SUFFIX}.lib
+    PRE_TARGETDEPS += $$RATMAN_BUILD_DIR/src/vic/vfs/$$BUILD_SUBDIR/vic_vfs$${TARGET_SUFFIX}.lib
+    LIBS += $$RATMAN_BUILD_DIR/src/vic/vfs/$$BUILD_SUBDIR/vic_vfs$${TARGET_SUFFIX}.lib
   }
   unix {
-    PRE_TARGETDEPS += $$RATMAN_DIR/src/vic/vfs/$$BUILD_SUBDIR/libvic_vfs$${TARGET_SUFFIX}.a
-    LIBS += $$RATMAN_DIR/src/vic/vfs/$$BUILD_SUBDIR/libvic_vfs$${TARGET_SUFFIX}.a
+    PRE_TARGETDEPS += $$RATMAN_BUILD_DIR/src/vic/vfs/$$BUILD_SUBDIR/libvic_vfs$${TARGET_SUFFIX}.a
+    LIBS += $$RATMAN_BUILD_DIR/src/vic/vfs/$$BUILD_SUBDIR/libvic_vfs$${TARGET_SUFFIX}.a
   }
     CONFIG += xvic_curl xvic_zlib xvic_db4
 

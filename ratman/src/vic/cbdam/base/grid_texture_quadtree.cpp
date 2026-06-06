@@ -177,6 +177,7 @@ namespace cbdam {
       }
       
       //      std::cerr << "grid_texture_quadtree::read_roots: read " << built_root_count << " roots" << std::endl;
+      std::cerr << "[read_roots] built_root_count=" << built_root_count << " is_open=" << (built_root_count != 0 ? "true" : "false") << std::endl;
       is_open_  = (built_root_count != 0);
     } else {
       SL_TRACE_OUT(1) << "texture read_roots: first level > 0" << std::endl;

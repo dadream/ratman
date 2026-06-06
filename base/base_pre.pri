@@ -27,10 +27,10 @@ isEmpty( PREFIX ) {
 isEmpty( PREFIX ) {
   PREFIX=$$(CYG_DIR)/usr/local
 }
-exists(/wksp/output/share/vic/qmakeconfig/default/default_pre.pri) {
-    include(/wksp/output/share/vic/qmakeconfig/default/default_pre.pri)
-} else {
+exists($${PREFIX}/share/vic/qmakeconfig/default/default_pre.pri) {
     include($${PREFIX}/share/vic/qmakeconfig/default/default_pre.pri)
+} else {
+    include($$PWD/../qmakeconfig/default/default_pre.pri)
 }
 
 ######################################

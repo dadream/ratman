@@ -21,7 +21,14 @@
 ######################################
 ## Default config
 
-include(/wksp/share/vic/qmakeconfig/default/default_pre.pri)
+isEmpty(PREFIX) {
+  PREFIX = $$(PREFIX)
+}
+exists($${PREFIX}/share/vic/qmakeconfig/default/default_pre.pri) {
+    include($${PREFIX}/share/vic/qmakeconfig/default/default_pre.pri)
+} else {
+    include($$PWD/../qmakeconfig/default/default_pre.pri)
+}
 
 ######################################
 ## Local config

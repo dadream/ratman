@@ -178,12 +178,14 @@ namespace cbdam {
     use_normal_ = true;
 
     tex_id_elevation_map_ = 0;
+    height_scale_factor_ = 1.0f;
 
     vbo_id_indices_ = 0;
     vbo_id_uv_coordinates_patch0_ = 0;
     vbo_id_uv_coordinates_patch1_ = 0;
 
     gl_rendering_mode_ = RENDERING_MODE_NONE; 
+    current_pass_ = PASS_FILL;
   }
 
   opengl_cached_data_renderer::~opengl_cached_data_renderer() {
@@ -205,6 +207,10 @@ namespace cbdam {
 
   opengl_cached_data_renderer::rendering_mode_t opengl_cached_data_renderer::gl_rendering_mode() const {
     return gl_rendering_mode_;
+  }
+
+  void opengl_cached_data_renderer::set_height_scale_factor(float scale) {
+    height_scale_factor_ = scale;
   }
 
   void opengl_cached_data_renderer::set_elevation_range(float min_h, float max_h) {
@@ -286,7 +292,7 @@ namespace cbdam {
 
     if (geo_xform_->is_planar()) {
       // enable texgen to get texture coordinates from heights
-      float param_s[4]= { 0, 0, 1.0f / (max_h_ - min_h_), 0.0f };
+      float param_s[4]= { 0, 0, 1.0f / (height_scale_factor_ * (max_h_ - min_h_)), 0.0f };
       glEnable(GL_TEXTURE_GEN_S);
       glTexGeni(GL_S, GL_TEXTURE_GEN_MODE, GL_OBJECT_LINEAR);
       glTexGenfv( GL_S, GL_OBJECT_PLANE, param_s);
@@ -360,6 +366,22 @@ namespace cbdam {
 
   void opengl_cached_data_renderer::render(const diamond_patch_id_t& node_idx, const diamond_patch_accessor_t* data_ptr) {
     if (gl_rendering_mode_ == RENDERING_MODE_NONE) return;
+
+    // Load texture matrix
+    if (use_color_) {
+      glMatrixMode(GL_TEXTURE);
+      glLoadMatrixd(data_ptr->texture_matrix().to_pointer());
+      glMatrixMode(GL_MODELVIEW);
+    }
+
+    // Load modelview matrix
+    const vector3d_t diamond_offset = data_ptr->vertices()->diamond_center() - current_center_;
+    sl::matrix4f VM_prime = base_modelview_;
+    VM_prime *= sl::matrix4f(1.0f, 0.0f, 0.0f, static_cast<float>(diamond_offset[0]),
+                             0.0f, 1.0f, 0.0f, static_cast<float>(diamond_offset[1]),
+                             0.0f, 0.0f, 1.0f, static_cast<float>(diamond_offset[2]),
+                             0.0f, 0.0f, 0.0f, 1.0f);
+    glLoadMatrixf(VM_prime.to_pointer());
 
     vbo_cache_t::iterator cache_it = vbo_cache_.find(node_idx);
     if (gl_rendering_mode_ == RENDERING_MODE_BASIC) {
@@ -744,6 +766,219 @@ namespace cbdam {
 
   void opengl_cached_data_renderer::clear_texture_cache() {
     texture_manager_.clear();
+  }
+
+  void opengl_cached_data_renderer::draw_begin() {
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    glEnable(GL_DEPTH_TEST);
+    glShadeModel(GL_SMOOTH);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CW);
+    
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE); 
+
+    if (current_pass_ == PASS_WIREFRAME) {
+      glDisable(GL_POLYGON_OFFSET_FILL); 
+      glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    } else {
+      glColor3f( 1.0, 1.0, 1.0 );
+      glDisable(GL_POLYGON_OFFSET_FILL);
+    }
+
+    bool elev_enabled = elevation_map_enabled();
+    const point4_t surface_color = 
+      (elev_enabled || use_color()) ? point4_t(1.0f,1.0f,1.0f, 1.0f) : point4_t(0.87f, 0.73f, 0.58f, 1.0f);
+
+    if (current_pass_ == PASS_WIREFRAME) {
+      static const point4_t line_color(0.0f, 0.0f, 0.0f, 1.0f);
+      frame_initialize(line_color);
+    } else {
+      frame_initialize(surface_color);
+    }
+
+    glMatrixMode(GL_TEXTURE);
+    glPushMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+
+    glGetFloatv(GL_MODELVIEW_MATRIX, base_modelview_.to_pointer());
+  }
+
+  void opengl_cached_data_renderer::draw_end() {
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
+    glMatrixMode(GL_TEXTURE);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPopAttrib();
+  }
+
+  void opengl_cached_data_renderer::set_rendering_pass(rendering_pass_t pass) {
+    current_pass_ = pass;
+  }
+
+  void opengl_cached_data_renderer::set_matrices(const sl::projective_map3d& P, 
+                                                 const sl::rigid_body_map3d& V, 
+                                                 const point3d_t& center) {
+    current_projection_ = P;
+    current_view_ = V;
+    current_center_ = center;
+  }
+
+  void opengl_cached_data_renderer::draw_bounding_volume(const bounding_volume_t& bvol, const point3d_t& center) const {
+    const point3d_t p000 = bvol.box_space_corner(0);
+    const point3d_t p111 = bvol.box_space_corner(7);
+    glPushMatrix();
+
+    glTranslated(-center[0], -center[1], -center[2]);
+    glMultMatrixd(bvol.from_box_space_map().as_matrix().to_pointer());
+    {
+      glColor3f(1.0f, 0.0f, 0.0f);
+      glLineWidth(2);
+      glBegin(GL_LINES);
+      glVertex3f(0.5f*(p000[0]+p111[0]), 0.5f*(p000[1]+p111[1]), p000[2]);
+      glVertex3f(0.5f*(p000[0]+p111[0]), 0.5f*(p000[1]+p111[1]), p111[2]);
+      glEnd();
+
+      glColor3f(1.0f, 1.0f, 1.0f);
+      glLineWidth(1);
+      glBegin(GL_LINE_LOOP);
+      glNormal3f( 0,0,-1 );
+      glVertex3f(p111[0], p000[1], p000[2]);
+      glVertex3f(p000[0], p000[1], p000[2]);
+      glVertex3f(p000[0], p111[1], p000[2]);
+      glVertex3f(p111[0], p111[1], p000[2]);
+      glEnd();
+
+      glBegin(GL_LINE_LOOP);
+      glNormal3f( 0,1,0 );
+      glVertex3f(p111[0], p111[1], p000[2]);
+      glVertex3f(p000[0], p111[1], p000[2]);
+      glVertex3f(p000[0], p111[1], p111[2]);
+      glVertex3f(p111[0], p111[1], p111[2]);
+      glEnd();
+
+      glBegin(GL_LINE_LOOP);
+      glNormal3f( 1,0,0 );
+      glVertex3f(p111[0], p000[1], p000[2]);
+      glVertex3f(p111[0], p111[1], p000[2]);
+      glVertex3f(p111[0], p111[1], p111[2]);
+      glVertex3f(p111[0], p000[1], p111[2]);
+      glEnd();
+
+      glBegin(GL_LINE_LOOP);
+      glNormal3f( 0,0,1 );
+      glVertex3f(p111[0], p000[1], p111[2]);
+      glVertex3f(p111[0], p111[1], p111[2]);
+      glVertex3f(p000[0], p111[1], p111[2]);
+      glVertex3f(p000[0], p000[1], p111[2]);
+      glEnd();
+
+      glBegin(GL_LINE_LOOP);
+      glNormal3f( 0,-1,0 );
+      glVertex3f(p111[0], p000[1], p111[2]);
+      glVertex3f(p000[0], p000[1], p111[2]);
+      glVertex3f(p000[0], p000[1], p000[2]);
+      glVertex3f(p111[0], p000[1], p000[2]);
+      glEnd();
+
+      glBegin(GL_LINE_LOOP);
+      glNormal3f( -1,0,0 );
+      glVertex3f(p000[0], p000[1], p000[2]);
+      glVertex3f(p000[0], p111[1], p000[2]);
+      glVertex3f(p000[0], p111[1], p111[2]);
+      glVertex3f(p000[0], p000[1], p111[2]);
+      glEnd();
+    }
+    glPopMatrix();
+  }
+
+  void opengl_cached_data_renderer::draw_progress_bar(float progress) {
+    GLint xywh[4];
+    glGetIntegerv(GL_VIEWPORT, xywh);
+    float l = 128;
+    float x_offset = 128+16;
+    float y_offset = 24;
+    float x_min = xywh[2] - x_offset;
+    float y_min = xywh[3] - y_offset;
+    float x_max = x_min + l;
+    float y_max = y_min + l/8.0f;     
+    
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
+    glLoadIdentity();
+    gluOrtho2D(0, xywh[2], 0, xywh[3]);
+    glMatrixMode(GL_MODELVIEW);
+    glPushMatrix();
+    glLoadIdentity();
+
+    glPushAttrib(GL_ENABLE_BIT);
+    glDisable(GL_TEXTURE_2D);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_DEPTH_TEST);
+    glDisable(GL_CULL_FACE);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    // draw border
+    glColor4f(0.8f, 0.8f, 0.8f, 0.5f);
+    glLineWidth(2);
+    glBegin(GL_LINE_STRIP);
+    glVertex2f(x_min, y_min);    
+    glVertex2f(x_min, y_max);
+    glVertex2f(x_max, y_max);    
+    glVertex2f(x_max, y_min);    
+    glVertex2f(x_min, y_min);
+    glEnd();
+    glLineWidth(1);
+
+    // draw progress quad
+    const float border = 3;
+    x_min += border;
+    y_min += border;
+    y_max -= border;
+    x_max = x_min + ((l - 2*border) * progress);
+
+    const uint8_t v0 = 130;
+    const uint8_t v1 = 180;
+    const uint8_t v2 = 200;
+    const uint8_t v3 = 255;
+    const uint8_t data[] = {v1, v1, v1, 255,
+			    v2, v2, v2, 255,
+			    v3, v3, v3, 255,
+			    v3, v3, v3, 255,
+			    v2, v2, v2, 255,
+			    v1, v1, v1, 255,
+			    v0, v0, v0, 255,
+			    v0, v0, v0, 255};
+			    
+    glEnable(GL_TEXTURE_1D);
+    glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S,GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_T,GL_CLAMP);
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA, 
+		 8, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+		 data);
+
+    glColor4f(1.0f, 1.0f, 1.0f, 0.7f);
+    glBegin(GL_QUADS);
+    glTexCoord1f(1.0f);    glVertex2f(x_min, y_min);    
+    glTexCoord1f(0.0f);    glVertex2f(x_min, y_max);
+    glTexCoord1f(0.0f);    glVertex2f(x_max, y_max);    
+    glTexCoord1f(1.0f);    glVertex2f(x_max, y_min);    
+    glEnd();
+
+    glPopAttrib();
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);
+    glPopMatrix();
   }
 
 }

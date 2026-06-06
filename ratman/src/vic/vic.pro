@@ -25,6 +25,9 @@ include (../../ratman_pre.pri)
 TEMPLATE = subdirs 
 SUBDIRS  = geo vfs cbdam ratman
 
+cbdam.depends = vfs geo
+ratman.depends = vfs geo cbdam
+
 #--------------------------------------------------------------------
 include (../../ratman_post.pri)
 #--------------------------------------------------------------------

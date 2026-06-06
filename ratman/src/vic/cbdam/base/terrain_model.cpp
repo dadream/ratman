@@ -29,7 +29,7 @@ namespace cbdam {
 
   class terrain_model_thread : public background_thread {
   protected:
-    mutable QMutex mutex_;
+    mutable std::mutex mutex_;
     terrain_model* terrain_model_;
     bool stop_requested_;
     uint32_t update_frame_counter_;
@@ -106,10 +106,7 @@ namespace cbdam {
 
   //////////////////////////////// functions called by MAIN thread //////////////////////////////////
 
-  terrain_model::terrain_model(geometry_fetcher_t* gf) :
-    representation_mutex_(QMutex::Recursive),
-    layers_mutex_(QMutex::Recursive),
-    parameters_mutex_(QMutex::Recursive) {
+  terrain_model::terrain_model(geometry_fetcher_t* gf) {
 
     // Init defaults
     update_thread_ = 0;

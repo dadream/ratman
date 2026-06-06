@@ -2,7 +2,7 @@ xvic_shp {
   unix {
     SHP_DIR = /usr
     SHP_LIB_DIR = /usr/lib/x86_64-linux-gnu
-    INCLUDEPATH += /wksp/include
+    INCLUDEPATH += $$PREFIX/include
     LIBS += -L$$SHP_LIB_DIR -lshp
     # Some systems use shapefil.h, others libshp/shapefil.h
     exists(/usr/include/shapefil.h) {

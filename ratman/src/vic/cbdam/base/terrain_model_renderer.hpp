@@ -23,7 +23,7 @@
 
 #include <vic/cbdam/base/config.hpp>
 #include <vic/cbdam/base/terrain_model.hpp>
-#include <vic/cbdam/base/opengl_cached_data_renderer.hpp>
+#include <vic/cbdam/base/cached_data_renderer.hpp>
 #include <sl/oriented_box.hpp>
 #include <sl/projective_map.hpp>
 #include <sl/rigid_body_map.hpp>
@@ -43,7 +43,8 @@ namespace cbdam {
     typedef sl::rigid_body_map3d                rigid_body_map_t;
     
   protected:
-    opengl_cached_data_renderer opengl_cached_data_renderer_;
+    cached_data_renderer *      cached_data_renderer_;
+    bool                        owns_renderer_;
     terrain_model *             terrain_model_;
     
     sl::projective_map3d        current_projection_;
@@ -64,6 +65,7 @@ namespace cbdam {
   public:
 
     terrain_model_renderer(terrain_model* tm);
+    terrain_model_renderer(terrain_model* tm, cached_data_renderer* r);
 
     ~terrain_model_renderer();
 
@@ -185,19 +187,19 @@ namespace cbdam {
 namespace cbdam {
 
   inline uint32_t terrain_model_renderer::stat_frame_vbo_creation_count() {
-    return opengl_cached_data_renderer_.stat_frame_vbo_creation_count();
+    return cached_data_renderer_->stat_frame_vbo_creation_count();
   }
 
   inline uint32_t terrain_model_renderer::stat_frame_vbo_reuse_count() {
-    return opengl_cached_data_renderer_.stat_frame_vbo_reuse_count();
+    return cached_data_renderer_->stat_frame_vbo_reuse_count();
   }
 
   inline uint32_t terrain_model_renderer::stat_frame_direct_render_count() {
-    return opengl_cached_data_renderer_.stat_frame_direct_render_count();
+    return cached_data_renderer_->stat_frame_direct_render_count();
   }
 
   inline uint32_t terrain_model_renderer::stat_rendered_triangles() {
-    return opengl_cached_data_renderer_.stat_rendered_triangles();
+    return cached_data_renderer_->stat_rendered_triangles();
   }
 
   inline bool terrain_model_renderer::is_terrain_model_attached() const {

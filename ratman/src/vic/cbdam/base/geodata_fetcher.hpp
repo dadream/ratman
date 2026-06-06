@@ -375,7 +375,7 @@ namespace cbdam {
 
   template <class T>
   bool geodata_fetcher<T>::is_http() const {
-    return sl::matches(base_url(), "http:*");
+    return sl::matches(base_url(), "http:*") || sl::matches(base_url(), "https:*") || sl::matches(base_url(), "file:*") || (base_url().find(".xml") != std::string::npos);
   }
 
   template <class T>
@@ -713,7 +713,7 @@ namespace cbdam {
 
       req_url_[i] = http_url_string(it->first, it->second);
 
-      SL_TRACE_OUT(1) << "URL: " << req_url_[i] << std::endl;
+      SL_TRACE_OUT(-1) << "URL: " << req_url_[i] << std::endl;
 
       curl_easy_setopt(req_connection_[i], CURLOPT_URL, req_url_[i].c_str());
       curl_easy_setopt(req_connection_[i], CURLOPT_WRITEFUNCTION, detail::geodata_fetcher_curl_callback_append_to_byte_array);
@@ -787,7 +787,7 @@ namespace cbdam {
  
   template <class T>
   void geodata_fetcher<T>::handle_error_response(const key_t& k, const std::string& message) {
-    SL_TRACE_OUT(1) << "Error for key = " << k[0] << " " << k[1] << " " << k[2] << ": " << message << std::endl;
+    SL_TRACE_OUT(-1) << "Error for key = " << k[0] << " " << k[1] << " " << k[2] << ": " << message << std::endl;
     push_result(k, std::make_pair(FAILED, (T*)0));
   }
 

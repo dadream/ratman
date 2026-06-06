@@ -19,13 +19,16 @@
 #======================================================================
 #---HDR---#
 vic_geo_base {
+  isEmpty(RATMAN_BUILD_DIR) {
+    RATMAN_BUILD_DIR = $$RATMAN_DIR
+  }
   win32 {
-    PRE_TARGETDEPS += $$RATMAN_DIR/src/vic/geo/base/$$BUILD_SUBDIR/vic_geo_base$${TARGET_SUFFIX}.lib
-    LIBS += $$RATMAN_DIR/src/vic/geo/base/$$BUILD_SUBDIR/vic_geo_base$${TARGET_SUFFIX}.lib
+    PRE_TARGETDEPS += $$RATMAN_BUILD_DIR/src/vic/geo/base/$$BUILD_SUBDIR/vic_geo_base$${TARGET_SUFFIX}.lib
+    LIBS += $$RATMAN_BUILD_DIR/src/vic/geo/base/$$BUILD_SUBDIR/vic_geo_base$${TARGET_SUFFIX}.lib
   }
   unix {
-    PRE_TARGETDEPS += $$RATMAN_DIR/src/vic/geo/base/$$BUILD_SUBDIR/libvic_geo_base$${TARGET_SUFFIX}.a
-    LIBS += $$RATMAN_DIR/src/vic/geo/base/$$BUILD_SUBDIR/libvic_geo_base$${TARGET_SUFFIX}.a
+    PRE_TARGETDEPS += $$RATMAN_BUILD_DIR/src/vic/geo/base/$$BUILD_SUBDIR/libvic_geo_base$${TARGET_SUFFIX}.a
+    LIBS += $$RATMAN_BUILD_DIR/src/vic/geo/base/$$BUILD_SUBDIR/libvic_geo_base$${TARGET_SUFFIX}.a
   }
 
   INCLUDEPATH += 
