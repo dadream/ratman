@@ -45,6 +45,13 @@ public:
 
   const cbdam::cbdam_diamond_fetcher* elevation_fetcher() const;
 
+  bool configure_verification(const std::string& script_file,
+			      const std::string& output_dir,
+			      bool exit_when_done,
+			      bool log_state);
+
+  bool verification_failed() const;
+
  signals:
     void stop_rendering();
 

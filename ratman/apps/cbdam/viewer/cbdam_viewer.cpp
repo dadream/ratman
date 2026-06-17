@@ -43,6 +43,11 @@ static sl::any arg_elevation_file_name(std::string(""));
 static sl::any arg_buildings_file_name(std::string(""));
 static sl::any arg_procedural_texture(false);
 static sl::any arg_help(false);
+static sl::any arg_verify_script(std::string(""));
+static sl::any arg_verify_output_dir(std::string(""));
+static sl::any arg_verify_exit(false);
+static sl::any arg_verify_window_size(std::string(""));
+static sl::any arg_verify_log_state(false);
 
 static sl::argument_record arg_table [] = {
   sl::argument_record("--help",    
@@ -65,6 +70,31 @@ static sl::argument_record arg_table [] = {
                       new sl::generic_extractor<void>,
                       &arg_procedural_texture,
                       "add procedural texture layer"),
+  sl::argument_record("--verify-script",
+                      "file",
+                      new sl::generic_extractor<std::string>,
+                      &arg_verify_script,
+                      "run deterministic viewer verification actions from file"),
+  sl::argument_record("--verify-output-dir",
+                      "dir",
+                      new sl::generic_extractor<std::string>,
+                      &arg_verify_output_dir,
+                      "write viewer verification artifacts to directory"),
+  sl::argument_record("--verify-exit",
+                      NULL,
+                      new sl::generic_extractor<void>,
+                      &arg_verify_exit,
+                      "exit after verification actions finish"),
+  sl::argument_record("--verify-window-size",
+                      "WIDTHxHEIGHT",
+                      new sl::generic_extractor<std::string>,
+                      &arg_verify_window_size,
+                      "set deterministic verification window size"),
+  sl::argument_record("--verify-log-state",
+                      NULL,
+                      new sl::generic_extractor<void>,
+                      &arg_verify_log_state,
+                      "log structured verification state events"),
 
 };
 
@@ -214,14 +244,52 @@ int main( int argc, char **argv ) {
   }
 
   QObject::connect(cbdam_w, SIGNAL(stop_rendering()), &qt_app, SLOT(quit()));
-  cbdam_w->resize( 800, 600 );
+
+  int window_width = 800;
+  int window_height = 600;
+  std::string verify_window_size = arg_verify_window_size.to_string();
+  if (!verify_window_size.empty()) {
+    std::size_t x_pos = verify_window_size.find('x');
+    if (x_pos == std::string::npos) {
+      x_pos = verify_window_size.find('X');
+    }
+    if (x_pos != std::string::npos) {
+      window_width = std::atoi(verify_window_size.substr(0, x_pos).c_str());
+      window_height = std::atoi(verify_window_size.substr(x_pos + 1).c_str());
+    }
+    if (window_width <= 0 || window_height <= 0) {
+      std::cerr << "invalid verify window size " << verify_window_size << std::endl;
+      delete cbdam_w;
+      return 3;
+    }
+  }
+  cbdam_w->resize(window_width, window_height);
+
+  std::string verify_script = arg_verify_script.to_string();
+  if (!verify_script.empty()) {
+    std::string verify_output_dir = arg_verify_output_dir.to_string();
+    if (verify_output_dir.empty()) {
+      std::cerr << "--verify-output-dir is required with --verify-script" << std::endl;
+      delete cbdam_w;
+      return 3;
+    }
+    if (!cbdam_w->configure_verification(verify_script,
+					 verify_output_dir,
+					 !arg_verify_exit.empty(),
+					 !arg_verify_log_state.empty())) {
+      delete cbdam_w;
+      return 3;
+    }
+  }
 
   cbdam_w->show();
 
   bool result = qt_app.exec();
+  if (cbdam_w->verification_failed()) {
+    result = true;
+  }
 
   delete cbdam_w;
   return result;
 }
-
 

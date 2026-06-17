@@ -64,3 +64,14 @@ void cbdam_window::slot_stop_rendering() {
 const cbdam::cbdam_diamond_fetcher* cbdam_window::elevation_fetcher() const {
   return ui.qgl_window_ptr->elevation_fetcher();
 }
+
+bool cbdam_window::configure_verification(const std::string& script_file,
+					  const std::string& output_dir,
+					  bool exit_when_done,
+					  bool log_state) {
+  return ui.qgl_window_ptr->configure_verification(script_file, output_dir, exit_when_done, log_state);
+}
+
+bool cbdam_window::verification_failed() const {
+  return ui.qgl_window_ptr->verification_failed();
+}

@@ -31,6 +31,8 @@
 #include <QMouseEvent>
 #include <QTimerEvent>
 #include <QKeyEvent>
+#include <QDir>
+#include <QImage>
 #include <QFileDialog>
 #include <glutil.h>	// for output_string
 #include <sl/fixed_size_point.hpp>
@@ -38,7 +40,9 @@
 #include <sl/clock.hpp>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <cassert>
+#include <cstdlib>
 #include "qgl_window_cbdam.hpp"
 #include "glutil.h"	// for output_string
 
@@ -56,6 +60,33 @@ void warning_function(void* /* context */, const char*msg) {
 
 sl::real_time_clock g_clock;
 sl::real_time_clock g_speed_clock;
+
+static std::string json_escape(const std::string& s) {
+  std::ostringstream out;
+  for (std::size_t i = 0; i < s.size(); ++i) {
+    char c = s[i];
+    switch (c) {
+    case '"': out << "\\\""; break;
+    case '\\': out << "\\\\"; break;
+    case '\n': out << "\\n"; break;
+    case '\r': out << "\\r"; break;
+    case '\t': out << "\\t"; break;
+    default: out << c; break;
+    }
+  }
+  return out.str();
+}
+
+static std::string trim_copy(const std::string& s) {
+  std::size_t begin = s.find_first_not_of(" \t\r\n");
+  if (begin == std::string::npos) return "";
+  std::size_t end = s.find_last_not_of(" \t\r\n");
+  return s.substr(begin, end - begin + 1);
+}
+
+static double degrees_to_radians(double degrees) {
+  return degrees * 3.14159265358979323846 / 180.0;
+}
 
 cbdam::uint32_t decore_texture_function(void*  /* context */,
 					const double* tm_g2l,
@@ -127,6 +158,16 @@ qgl_window_cbdam::qgl_window_cbdam(QWidget* parent)
   m_camera_controller = 0;
 
   m_building_renderer_enabled = true;
+  m_verify_enabled = false;
+  m_verify_exit_when_done = false;
+  m_verify_log_state = false;
+  m_verify_failed = false;
+  m_verify_done = false;
+  m_verify_next_action = 0;
+  m_verify_wait_until_frame = 0;
+  m_verify_rendered_frames = 0;
+  m_verify_pitch = 0.0;
+  m_verify_yaw = 0.0;
 
   g_clock.restart();
   g_speed_clock.restart();
@@ -279,6 +320,9 @@ void qgl_window_cbdam::paintGL(){
   if ( m_statistics_mode > 0 ) {
     draw_statistics();
   }
+
+  ++m_verify_rendered_frames;
+  process_verify_actions();
 }
  
 void qgl_window_cbdam::resizeGL( int w, int h ) {
@@ -329,7 +373,9 @@ void qgl_window_cbdam::set_projection_matrix(int w, int h) {
 }
 
 void qgl_window_cbdam::timerEvent ( QTimerEvent * /* e */ ) {
-  m_camera_controller->idle_update();
+  if (!m_verify_enabled || m_verify_done) {
+    m_camera_controller->idle_update();
+  }
   updateGL();
 }
 
@@ -656,6 +702,279 @@ bool qgl_window_cbdam::init_buildings(const char* fname) {
   }
 }
 
+bool qgl_window_cbdam::configure_verification(const std::string& script_file,
+					      const std::string& output_dir,
+					      bool exit_when_done,
+					      bool log_state) {
+  m_verify_enabled = true;
+  m_verify_exit_when_done = exit_when_done;
+  m_verify_log_state = log_state;
+  m_verify_output_dir = output_dir;
+  m_verify_failed = false;
+  m_verify_done = false;
+  m_verify_next_action = 0;
+  m_verify_wait_until_frame = 0;
+  m_verify_rendered_frames = 0;
+  QDir dir(QString::fromStdString(output_dir));
+  if (!dir.exists() && !dir.mkpath(".")) {
+    fail_verify("cannot create output dir " + output_dir);
+    return false;
+  }
+  return load_verify_script(script_file);
+}
+
+bool qgl_window_cbdam::verification_failed() const {
+  return m_verify_failed;
+}
+
+bool qgl_window_cbdam::load_verify_script(const std::string& script_file) {
+  std::ifstream in(script_file.c_str());
+  if (!in) {
+    fail_verify("cannot open verify script " + script_file);
+    return false;
+  }
+  std::string line;
+  while (std::getline(in, line)) {
+    std::size_t comment = line.find('#');
+    if (comment != std::string::npos) {
+      line = line.substr(0, comment);
+    }
+    line = trim_copy(line);
+    if (line.empty()) {
+      continue;
+    }
+    std::istringstream iss(line);
+    verify_action_t action;
+    iss >> action.name;
+    std::string arg;
+    while (iss >> arg) {
+      action.args.push_back(arg);
+    }
+    m_verify_actions.push_back(action);
+  }
+  log_verify_event("VERIFY_SCRIPT_LOADED", script_file);
+  return true;
+}
+
+void qgl_window_cbdam::process_verify_actions() {
+  if (!m_verify_enabled || m_verify_failed || m_verify_done) {
+    return;
+  }
+  if (m_verify_wait_until_frame != 0 && m_verify_rendered_frames < m_verify_wait_until_frame) {
+    return;
+  }
+  m_verify_wait_until_frame = 0;
+  while (m_verify_next_action < m_verify_actions.size() && !m_verify_failed && !m_verify_done) {
+    verify_action_t action = m_verify_actions[m_verify_next_action++];
+    log_verify_event("VERIFY_ACTION_START", action.name);
+    bool ok = execute_verify_action(action);
+    if (ok) {
+      log_verify_event("VERIFY_ACTION_DONE", action.name);
+    }
+    if (action.name == "wait_frames") {
+      break;
+    }
+  }
+}
+
+bool qgl_window_cbdam::execute_verify_action(const verify_action_t& action) {
+  if (action.name == "wait_frames") {
+    if (action.args.size() != 1) {
+      fail_verify("wait_frames requires one argument");
+      return false;
+    }
+    int frames = std::atoi(action.args[0].c_str());
+    if (frames < 0) frames = 0;
+    m_verify_wait_until_frame = m_verify_rendered_frames + (unsigned int)frames;
+    return true;
+  } else if (action.name == "capture") {
+    if (action.args.size() != 1) {
+      fail_verify("capture requires one argument");
+      return false;
+    }
+    return capture_verify_state(action.args[0]);
+  } else if (action.name == "zoom_in") {
+    if (action.args.size() != 1) {
+      fail_verify("zoom_in requires one argument");
+      return false;
+    }
+    verify_zoom(std::atoi(action.args[0].c_str()), true);
+    return true;
+  } else if (action.name == "zoom_out") {
+    if (action.args.size() != 1) {
+      fail_verify("zoom_out requires one argument");
+      return false;
+    }
+    verify_zoom(std::atoi(action.args[0].c_str()), false);
+    return true;
+  } else if (action.name == "tilt") {
+    if (action.args.size() != 1) {
+      fail_verify("tilt requires one argument");
+      return false;
+    }
+    verify_tilt(std::atof(action.args[0].c_str()));
+    return true;
+  } else if (action.name == "rotate") {
+    if (action.args.size() != 1) {
+      fail_verify("rotate requires one argument");
+      return false;
+    }
+    verify_rotate(std::atof(action.args[0].c_str()));
+    return true;
+  } else if (action.name == "key") {
+    if (action.args.size() != 1) {
+      fail_verify("key requires one argument");
+      return false;
+    }
+    return apply_verify_key(action.args[0]);
+  } else if (action.name == "reset") {
+    set_initial_position();
+    return true;
+  } else if (action.name == "exit") {
+    m_verify_done = true;
+    log_verify_event("VERIFY_PROCESS_EXIT", "script complete");
+    if (m_verify_exit_when_done) {
+      emit stop_rendering();
+    }
+    return true;
+  }
+
+  fail_verify("unknown verify action " + action.name);
+  return false;
+}
+
+bool qgl_window_cbdam::capture_verify_state(const std::string& name) {
+  std::string png_path = m_verify_output_dir + "/" + name + ".png";
+  std::string state_path = m_verify_output_dir + "/state_" + name + ".json";
+  QImage image = grabFrameBuffer(false);
+  if (image.isNull() || !image.save(QString::fromStdString(png_path), "PNG")) {
+    fail_verify("cannot write capture " + png_path);
+    return false;
+  }
+  if (!write_verify_state(name, state_path)) {
+    return false;
+  }
+  log_verify_event("VERIFY_CAPTURE_WRITTEN", name);
+  return true;
+}
+
+bool qgl_window_cbdam::write_verify_state(const std::string& name, const std::string& path) {
+  std::ofstream out(path.c_str());
+  if (!out) {
+    fail_verify("cannot write state " + path);
+    return false;
+  }
+  cbdam::point3d_t pos = m_camera.position();
+  out << "{\n";
+  out << "  \"capture\": \"" << json_escape(name) << "\",\n";
+  out << "  \"frame\": " << m_verify_rendered_frames << ",\n";
+  out << "  \"width\": " << width() << ",\n";
+  out << "  \"height\": " << height() << ",\n";
+  out << "  \"camera_position\": [" << pos[0] << ", " << pos[1] << ", " << pos[2] << "],\n";
+  out << "  \"camera_distance\": " << (m_camera_controller ? m_camera_controller->distance() : 0.0) << ",\n";
+  out << "  \"pixel_tolerance\": " << m_pixel_tolerance << ",\n";
+  out << "  \"statistics_mode\": " << m_statistics_mode << ",\n";
+  out << "  \"wireframe_enabled\": " << (m_renderer && m_renderer->is_wireframe_enabled() ? "true" : "false") << ",\n";
+  out << "  \"color_enabled\": " << (m_renderer && m_renderer->is_color_enabled() ? "true" : "false") << ",\n";
+  out << "  \"patch_color_enabled\": " << (m_renderer && m_renderer->is_patch_color_enabled() ? "true" : "false") << ",\n";
+  out << "  \"draw_bounding_volumes_enabled\": " << (m_renderer && m_renderer->is_draw_bounding_volumes_enabled() ? "true" : "false") << ",\n";
+  out << "  \"shading_enabled\": " << (m_renderer && m_renderer->is_shading_enabled() ? "true" : "false") << ",\n";
+  out << "  \"adaptive_tolerance_enabled\": " << (m_renderer && m_renderer->is_adaptive_tolerance_enabled() ? "true" : "false") << ",\n";
+  out << "  \"terrain_connected\": " << (m_terrain_model && m_terrain_model->is_connected() ? "true" : "false") << ",\n";
+  out << "  \"planar\": " << (m_terrain_model && m_terrain_model->is_planar() ? "true" : "false") << ",\n";
+  out << "  \"rendered_triangles\": " << (m_renderer ? m_renderer->stat_rendered_triangles() : 0) << ",\n";
+  out << "  \"mean_fps\": " << m_mean_fps << "\n";
+  out << "}\n";
+  return true;
+}
+
+void qgl_window_cbdam::log_verify_event(const std::string& event, const std::string& detail) const {
+  if (m_verify_log_state || event == "VERIFY_PROCESS_EXIT" || event == "VERIFY_CAPTURE_WRITTEN") {
+    std::cerr << event << " " << detail << std::endl;
+  }
+}
+
+void qgl_window_cbdam::fail_verify(const std::string& detail) {
+  m_verify_failed = true;
+  std::cerr << "VERIFY_ERROR " << detail << std::endl;
+  if (m_verify_exit_when_done) {
+    emit stop_rendering();
+  }
+}
+
+bool qgl_window_cbdam::apply_verify_key(const std::string& key) {
+  int qt_key = 0;
+  if (key == "f" || key == "F") qt_key = Qt::Key_F;
+  else if (key == "n" || key == "N") qt_key = Qt::Key_N;
+  else if (key == "c" || key == "C") qt_key = Qt::Key_C;
+  else if (key == "b" || key == "B") qt_key = Qt::Key_B;
+  else if (key == "p" || key == "P") qt_key = Qt::Key_P;
+  else if (key == "e" || key == "E") qt_key = Qt::Key_E;
+  else if (key == "l" || key == "L") qt_key = Qt::Key_L;
+  else if (key == "q" || key == "Q") qt_key = Qt::Key_Q;
+  else if (key == "escape" || key == "Esc" || key == "ESC") qt_key = Qt::Key_Escape;
+  else {
+    fail_verify("unsupported key " + key);
+    return false;
+  }
+  QKeyEvent event(QEvent::KeyPress, qt_key, Qt::NoModifier);
+  keyPressEvent(&event);
+  return true;
+}
+
+void qgl_window_cbdam::verify_zoom(int steps, bool zoom_in) {
+  if (steps < 0) steps = 0;
+  double factor = zoom_in ? 0.85 : 1.0 / 0.85;
+  double scale = 1.0;
+  for (int i = 0; i < steps; ++i) {
+    scale *= factor;
+  }
+  cbdam::camera_controller_flight* flight = dynamic_cast<cbdam::camera_controller_flight*>(m_camera_controller);
+  if (flight != 0) {
+    cbdam::point3d_t p = m_camera.position();
+    cbdam::camera::vector3_t pos(p[0], p[1], p[2] * scale);
+    if (pos[2] < 0.0001 * m_planet_radius) {
+      pos[2] = 0.0001 * m_planet_radius;
+    }
+    flight->set_position(pos);
+    set_verify_flight_view(pos);
+  } else if (m_camera_controller != 0) {
+    m_camera_controller->set_distance(m_camera_controller->distance() * scale);
+  }
+}
+
+void qgl_window_cbdam::verify_tilt(double degrees) {
+  m_verify_pitch = degrees_to_radians(degrees);
+  cbdam::camera_controller_flight* flight = dynamic_cast<cbdam::camera_controller_flight*>(m_camera_controller);
+  if (flight != 0) {
+    cbdam::point3d_t p = m_camera.position();
+    cbdam::camera::vector3_t pos(p[0], p[1], p[2]);
+    set_verify_flight_view(pos);
+    return;
+  }
+  cbdam::camera_controller_vtrackball* trackball = dynamic_cast<cbdam::camera_controller_vtrackball*>(m_camera_controller);
+  if (trackball != 0) {
+    trackball->set_tilt_angle(m_verify_pitch);
+  }
+}
+
+void qgl_window_cbdam::verify_rotate(double degrees) {
+  m_verify_yaw += degrees_to_radians(degrees);
+  cbdam::camera_controller_flight* flight = dynamic_cast<cbdam::camera_controller_flight*>(m_camera_controller);
+  if (flight != 0) {
+    cbdam::point3d_t p = m_camera.position();
+    cbdam::camera::vector3_t pos(p[0], p[1], p[2]);
+    set_verify_flight_view(pos);
+  }
+}
+
+void qgl_window_cbdam::set_verify_flight_view(const cbdam::camera::vector3_t& position) {
+  m_camera.set_view(cbdam::camera::rigid_body_map_t(
+		      cbdam::camera::linear_map_factory_t::rotation(0, -m_verify_pitch) *
+		      cbdam::camera::linear_map_factory_t::rotation(2, -m_verify_yaw) *
+		      cbdam::camera::linear_map_factory_t::translation(-position)));
+}
+
 void qgl_window_cbdam::set_initial_position() {
   // set offset value used to compute proper far projection plane
   float aspect_ratio = ( height()==0 ) ? 1.0 :  (float)width() / (float)height();
@@ -671,6 +990,9 @@ void qgl_window_cbdam::set_initial_position() {
       cbdam::point2d_t p = geo_xform->bounding_rectangle().center();
       cbdam::camera::vector3_t pos(p[0], p[1], m_planet_radius/(2.0f*tan(m_y_fov/2.0)*aspect_ratio));
       cc->set_position(pos);
+      m_verify_pitch = 0.0;
+      m_verify_yaw = 0.0;
+      set_verify_flight_view(pos);
       std::cerr << "set position " << pos[0] << " "  << pos[1] << " "  << pos[2] << std::endl;
     }
   }
@@ -859,6 +1181,3 @@ const cbdam::cbdam_diamond_fetcher* qgl_window_cbdam::elevation_fetcher() const 
   assert(m_terrain_model->is_connected());
   return m_terrain_model->elevation_layer()->fetcher();
 }
-
-
-

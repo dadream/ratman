@@ -34,6 +34,8 @@
 #include <QKeyEvent>
 #include <vic/cbdam/base/terrain_model_renderer.hpp>
 #include <vic/cbdam/base/building_renderer.hpp>
+#include <string>
+#include <vector>
 
 /** 
  * qgl_window_cbdam class, derived from qgl_window_base
@@ -60,6 +62,13 @@ class qgl_window_cbdam : public qgl_window_base
   bool init_buildings(const char* fname);
   
   const cbdam::cbdam_diamond_fetcher* elevation_fetcher() const;
+
+  bool configure_verification(const std::string& script_file,
+			      const std::string& output_dir,
+			      bool exit_when_done,
+			      bool log_state);
+
+  bool verification_failed() const;
 
  signals:
   /// signal emitted to stop application
@@ -112,6 +121,35 @@ class qgl_window_cbdam : public qgl_window_base
 
   std::pair<bool, cbdam::point3d_t> current_graph_intersection_from_cursor_position(int x, int y) const;
 
+  struct verify_action_t {
+    std::string name;
+    std::vector<std::string> args;
+  };
+
+  bool load_verify_script(const std::string& script_file);
+
+  void process_verify_actions();
+
+  bool execute_verify_action(const verify_action_t& action);
+
+  bool capture_verify_state(const std::string& name);
+
+  bool write_verify_state(const std::string& name, const std::string& path);
+
+  void log_verify_event(const std::string& event, const std::string& detail) const;
+
+  void fail_verify(const std::string& detail);
+
+  bool apply_verify_key(const std::string& key);
+
+  void verify_zoom(int steps, bool zoom_in);
+
+  void verify_tilt(double degrees);
+
+  void verify_rotate(double degrees);
+
+  void set_verify_flight_view(const cbdam::camera::vector3_t& position);
+
  protected:
   //data members
   cbdam::terrain_model*                 m_terrain_model;
@@ -134,6 +172,18 @@ class qgl_window_cbdam : public qgl_window_base
   float                                 m_mean_fps;
   bool					m_building_renderer_enabled;
   std::pair<bool, cbdam::point3d_t>	m_current_intersection;
+  bool                                  m_verify_enabled;
+  bool                                  m_verify_exit_when_done;
+  bool                                  m_verify_log_state;
+  bool                                  m_verify_failed;
+  bool                                  m_verify_done;
+  std::string                           m_verify_output_dir;
+  std::vector<verify_action_t>          m_verify_actions;
+  std::size_t                           m_verify_next_action;
+  unsigned int                          m_verify_wait_until_frame;
+  unsigned int                          m_verify_rendered_frames;
+  double                                m_verify_pitch;
+  double                                m_verify_yaw;
 };
 
 #endif // VIEWER_QGL_WINDOW_CBDAM_H
