@@ -23,6 +23,7 @@
 
 #include <vic/cbdam/base/config.hpp>
 #include <sl/dense_array.hpp>
+#include <cstring>
 
 namespace cbdam {
   
@@ -73,15 +74,15 @@ namespace cbdam {
     uint32_t h =p.extent()[0];
     uint32_t w =p.extent()[1];
     
-    memcpy(cursor, &h, sizeof(uint32_t));
+    std::memcpy(cursor, &h, sizeof(uint32_t));
     cursor += sizeof(uint32_t);
-    memcpy(cursor, &w, sizeof(uint32_t));
+    std::memcpy(cursor, &w, sizeof(uint32_t));
     cursor += sizeof(uint32_t);
     
     for(uint32_t y = 0; y < h; ++y) {
       for(uint32_t x = 0; x < w; ++x) {
         T value = p(y,x);
-        memcpy(cursor, &value, sizeof(T));
+        std::memcpy(cursor, &value, sizeof(T));
         cursor += sizeof(T);
       }
     }
@@ -92,15 +93,15 @@ namespace cbdam {
   inline void null_compressor<T>::decompress_to(array2_t& p, const uint8_t* compressed, uint32_t compressed_size) {
     const uint8_t* cursor = compressed;
     uint32_t h, w;
-    memcpy(&h, cursor, sizeof(uint32_t));
+    std::memcpy(&h, cursor, sizeof(uint32_t));
     cursor += sizeof(uint32_t);
-    memcpy(&w, cursor, sizeof(uint32_t));
+    std::memcpy(&w, cursor, sizeof(uint32_t));
     cursor += sizeof(uint32_t);
     T value;
     p.resize(sl::index<2>(h,w));
     for(uint32_t y = 0; y < h; ++y) {
       for(uint32_t x = 0; x < w; ++x) {
-        memcpy(&value, cursor, sizeof(T));
+        std::memcpy(&value, cursor, sizeof(T));
         p(y, x) = value;
         cursor += sizeof(T);
       }
