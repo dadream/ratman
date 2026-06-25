@@ -263,9 +263,13 @@ int main( int argc, char **argv ) {
       return 3;
     }
   }
-  cbdam_w->resize(window_width, window_height);
-
   std::string verify_script = arg_verify_script.to_string();
+  if (!verify_script.empty()) {
+    cbdam_w->set_verification_window_size(window_width, window_height);
+  } else {
+    cbdam_w->resize(window_width, window_height);
+  }
+
   if (!verify_script.empty()) {
     std::string verify_output_dir = arg_verify_output_dir.to_string();
     if (verify_output_dir.empty()) {
@@ -283,6 +287,10 @@ int main( int argc, char **argv ) {
   }
 
   cbdam_w->show();
+  if (!verify_script.empty()) {
+    cbdam_w->set_verification_window_size(window_width, window_height);
+    qt_app.processEvents();
+  }
 
   bool result = qt_app.exec();
   if (cbdam_w->verification_failed()) {
@@ -292,4 +300,3 @@ int main( int argc, char **argv ) {
   delete cbdam_w;
   return result;
 }
-

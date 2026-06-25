@@ -72,6 +72,21 @@ bool cbdam_window::configure_verification(const std::string& script_file,
   return ui.qgl_window_ptr->configure_verification(script_file, output_dir, exit_when_done, log_state);
 }
 
+void cbdam_window::set_verification_window_size(int width, int height) {
+  if (layout()) {
+    layout()->setSizeConstraint(QLayout::SetFixedSize);
+  }
+  setFixedSize(width, height);
+  resize(width, height);
+  ui.qgl_window_ptr->set_verification_window_size(width, height);
+  ui.qgl_window_ptr->setFixedSize(width, height);
+  ui.qgl_window_ptr->resize(width, height);
+  ui.qgl_window_ptr->setGeometry(0, 0, width, height);
+  ui.qgl_window_ptr->updateGeometry();
+  updateGeometry();
+  adjustSize();
+}
+
 bool cbdam_window::verification_failed() const {
   return ui.qgl_window_ptr->verification_failed();
 }

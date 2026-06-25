@@ -168,6 +168,9 @@ qgl_window_cbdam::qgl_window_cbdam(QWidget* parent)
   m_verify_rendered_frames = 0;
   m_verify_pitch = 0.0;
   m_verify_yaw = 0.0;
+  m_verify_expected_width = 0;
+  m_verify_expected_height = 0;
+  m_verify_resize_wait_frames = 0;
 
   g_clock.restart();
   g_speed_clock.restart();
@@ -723,6 +726,15 @@ bool qgl_window_cbdam::configure_verification(const std::string& script_file,
   return load_verify_script(script_file);
 }
 
+void qgl_window_cbdam::set_verification_window_size(int width, int height) {
+  m_verify_expected_width = width;
+  m_verify_expected_height = height;
+  m_verify_resize_wait_frames = 0;
+  setFixedSize(width, height);
+  resize(width, height);
+  updateGeometry();
+}
+
 bool qgl_window_cbdam::verification_failed() const {
   return m_verify_failed;
 }
@@ -760,6 +772,9 @@ void qgl_window_cbdam::process_verify_actions() {
   if (!m_verify_enabled || m_verify_failed || m_verify_done) {
     return;
   }
+  if (!ensure_verify_window_size()) {
+    return;
+  }
   if (m_verify_wait_until_frame != 0 && m_verify_rendered_frames < m_verify_wait_until_frame) {
     return;
   }
@@ -775,6 +790,31 @@ void qgl_window_cbdam::process_verify_actions() {
       break;
     }
   }
+}
+
+bool qgl_window_cbdam::ensure_verify_window_size() {
+  if (m_verify_expected_width <= 0 || m_verify_expected_height <= 0) {
+    return true;
+  }
+  if (width() == m_verify_expected_width && height() == m_verify_expected_height) {
+    m_verify_resize_wait_frames = 0;
+    return true;
+  }
+
+  setFixedSize(m_verify_expected_width, m_verify_expected_height);
+  resize(m_verify_expected_width, m_verify_expected_height);
+  updateGeometry();
+  update();
+
+  ++m_verify_resize_wait_frames;
+  if (m_verify_resize_wait_frames > 90) {
+    std::ostringstream out;
+    out << "verify window size mismatch expected "
+        << m_verify_expected_width << "x" << m_verify_expected_height
+        << " got " << width() << "x" << height();
+    fail_verify(out.str());
+  }
+  return false;
 }
 
 bool qgl_window_cbdam::execute_verify_action(const verify_action_t& action) {

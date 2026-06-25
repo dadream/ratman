@@ -68,6 +68,8 @@ class qgl_window_cbdam : public qgl_window_base
 			      bool exit_when_done,
 			      bool log_state);
 
+  void set_verification_window_size(int width, int height);
+
   bool verification_failed() const;
 
  signals:
@@ -130,6 +132,8 @@ class qgl_window_cbdam : public qgl_window_base
 
   void process_verify_actions();
 
+  bool ensure_verify_window_size();
+
   bool execute_verify_action(const verify_action_t& action);
 
   bool capture_verify_state(const std::string& name);
@@ -184,6 +188,9 @@ class qgl_window_cbdam : public qgl_window_base
   unsigned int                          m_verify_rendered_frames;
   double                                m_verify_pitch;
   double                                m_verify_yaw;
+  int                                   m_verify_expected_width;
+  int                                   m_verify_expected_height;
+  unsigned int                          m_verify_resize_wait_frames;
 };
 
 #endif // VIEWER_QGL_WINDOW_CBDAM_H

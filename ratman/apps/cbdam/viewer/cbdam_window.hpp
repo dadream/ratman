@@ -50,6 +50,8 @@ public:
 			      bool exit_when_done,
 			      bool log_state);
 
+  void set_verification_window_size(int width, int height);
+
   bool verification_failed() const;
 
  signals:
