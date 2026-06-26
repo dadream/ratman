@@ -22,7 +22,12 @@
 #define VIC_MATH_NELDER_MEAD_MINIMIZER_HPP
 
 #include <sl/math.hpp>
-#include <sl/scalar_functor_solver.hpp>
+#include <vic/math/scalar_functor_solver.hpp>
+
+#include <algorithm>
+#include <cmath>
+#include <iostream>
+#include <vector>
 
 namespace vic {
 
@@ -96,7 +101,7 @@ namespace vic {
 	  if (i>1) {
 	    simplex_[i-1][i-2] += 1.0 + 0.01*(i); // FIXME
 	  }
-	  simplex_energy_[i-1] = fn(&(simplex_[i-1][0]));
+	  simplex_energy_[i-1] = this->fn(&(simplex_[i-1][0]));
 
 	  std::cerr << "RESTART[" << i << "]: (";
 	  for (std::size_t j=1; j <= N; j++) {
@@ -186,7 +191,7 @@ namespace vic {
 		    simplex_sum_[j-1] = 0.5*(simplex_[i-1][j-1]+simplex_[ilo-1][j-1]);
 		    simplex_[i-1][j-1] = simplex_sum_[j-1];
 		  }
-		  simplex_energy_[i-1] = fn(&(simplex_sum_[0])); // offset
+		  simplex_energy_[i-1] = this->fn(&(simplex_sum_[0])); // offset
 		}
 	      }
 	      update_simplex_sum();
@@ -205,7 +210,7 @@ namespace vic {
 	for (std::size_t j = 1; j <= N; j++) {
 	  ptry[j-1] = simplex_sum_[j-1]*fac1-simplex_[ihi-1][j-1]*fac2;
 	}
-	value_t ytry = fn(&(ptry[0]));
+	value_t ytry = this->fn(&(ptry[0]));
 	if (ytry < simplex_energy_[ihi-1]) {
 	  simplex_energy_[ihi-1] = ytry;
 	  for (std::size_t j = 1; j <= N; j++) {
@@ -218,7 +223,7 @@ namespace vic {
     };
 
   } // namespace math
-} namespace vic
+} // namespace vic
 
 
 #endif
