@@ -23,7 +23,11 @@
 
 #include <sl/random.hpp>
 #include <sl/math.hpp>
-#include <sl/scalar_functor_solver.hpp>
+#include <vic/math/scalar_functor_solver.hpp>
+
+#include <algorithm>
+#include <iostream>
+#include <vector>
 
 namespace vic {
 
@@ -169,7 +173,7 @@ namespace vic {
 	set_population_count(16*this->arg_dimension());
 	set_mutation_scale(0.7);
 	set_crossover_probability(0.9);
-	set_max_step_count(8*population_count());
+	this->set_max_step_count(8*population_count());
       }
 
       virtual void restart() {
@@ -222,7 +226,7 @@ namespace vic {
 	     candidate < population_count_; 
 	     ++candidate) {
 	  generate_candidate(candidate, trial_solution);
-	  trial_energy = fn(&(trial_solution[0]));
+	  trial_energy = this->fn(&(trial_solution[0]));
 
 	  if (trial_energy < population_energy_[candidate]) {
 	    // New minimum for this candidate
