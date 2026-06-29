@@ -1,5 +1,5 @@
 /* XPM */
-static char * rot_3d_xpm[] = {
+static const char * rot_3d_xpm[] = {
 "32 32 4 1",
 " 	c None",
 ".	c #000000",

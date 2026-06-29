@@ -1,5 +1,5 @@
 /* XPM */
-static char * ovc_s_xpm[] = {
+static const char * ovc_s_xpm[] = {
 "40 25 136 2",
 "  	c #FFFFFF",
 ". 	c #FEFEFE",

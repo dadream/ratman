@@ -64,7 +64,7 @@ namespace ratman {
       QString tilt;
       QString heading;
 
-      for (std::size_t i=0; i < element_list.length(); ++i){
+      for (int i=0; i < element_list.length(); ++i){
 	QDomNode poiNode = element_list.item(i);
 	QDomElement poiElement = poiNode.toElement();
 	for(QDomNode n = poiElement.firstChild(); !n.isNull(); n = n.nextSibling()) {
@@ -230,7 +230,7 @@ namespace ratman {
 
   void bookmarks::edit_kml_bookmark(const QString& s, bool to_delete, const QString& new_n){
     QDomNodeList element_list = doc_.documentElement().elementsByTagName("Placemark");
-    for (std::size_t i=0; i < element_list.length(); ++i){
+    for (int i=0; i < element_list.length(); ++i){
       QDomNode poiNode = element_list.item(i);
       QDomElement poiElement = poiNode.toElement();
       for(QDomNode n = poiElement.firstChild(); !n.isNull(); n = n.nextSibling()) {

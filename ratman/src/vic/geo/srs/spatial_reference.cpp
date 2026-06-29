@@ -22,6 +22,7 @@
 
 #include <vic/geo/srs/spatial_reference.hpp>
 #include <ogr_spatialref.h>
+#include <cpl_conv.h>
 
 namespace vic {
 
@@ -89,7 +90,7 @@ namespace vic {
 	  char* wkt;
 	  static_cast<OGRSpatialReference*>(srs_)->exportToWkt(&wkt);
 	  std::string result = std::string(wkt);
-	  OGRFree(wkt);
+	  CPLFree(wkt);
 	  return result;
 	} else {
 	  return std::string("INVALID");
@@ -123,8 +124,7 @@ namespace vic {
       double spatial_reference::linear_units() const {
 	double result = 1.0;
 	if (srs_) {
-	  char *name;
-	  result = static_cast<OGRSpatialReference*>(srs_)->GetLinearUnits(&name);
+	  result = static_cast<OGRSpatialReference*>(srs_)->GetLinearUnits();
 	}
 	return result;	
       }
@@ -132,8 +132,7 @@ namespace vic {
       double spatial_reference::angular_units() const {
 	double result = 1.0;
 	if (srs_) {
-	  char *name;
-	  result = static_cast<OGRSpatialReference*>(srs_)->GetAngularUnits(&name);
+	  result = static_cast<OGRSpatialReference*>(srs_)->GetAngularUnits();
 	}
 	return result;	
       }

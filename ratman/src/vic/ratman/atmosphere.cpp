@@ -687,10 +687,8 @@ namespace ratman {
 
  void atmosphere::render_sun_disk(const matrix4x4d_t& V){
    matrix4x4d_t C = V.inverse();
-   point3d_t    camera_eye = point3d_t(C(0,3), C(1,3), C(2,3));
    vector3d_t   camera_x   = vector3d_t(C(0,0), C(0,1), C(0,2)).ok_normalized();
    vector3d_t   camera_y   = vector3d_t(C(1,0), C(1,1), C(1,2)).ok_normalized();
-   vector3d_t   camera_z   = vector3d_t(C(2,0), C(2,1), C(2,2)).ok_normalized();
    vector3d_t   b_up    = camera_y;
    vector3d_t   b_right = camera_x;
    vector3d_t   b_look  = b_right.cross(b_up);

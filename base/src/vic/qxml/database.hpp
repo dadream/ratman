@@ -185,14 +185,14 @@ namespace vic {
       void load_document(const char* filename);
 
       // Protected function
-      inline void set_int(const char *key, int v, char * format ) {
+      inline void set_int(const char *key, int v, const char * format ) {
 	char  number[32];
 	sprintf( number, format, v);
 	set_qstring(key, QString( number ));
       }
 
 
-      inline void set_float(const char *key, float v, char * format) {
+      inline void set_float(const char *key, float v, const char * format) {
 	char  number[32];
 	sprintf( number, format, v);
 	set_qstring(key, QString( number) );

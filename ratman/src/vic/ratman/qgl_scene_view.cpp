@@ -19,9 +19,16 @@
 //======================================================================
 //---HDR---//
 #include <GL/glew.h>
-#include <QtGui>
-#include <QtOpenGL>
+#include <QApplication>
+#include <QCursor>
+#include <QKeyEvent>
+#include <QMouseEvent>
+#include <QPixmap>
+#include <QPoint>
 #include <QString>
+#include <QTimerEvent>
+#include <QWheelEvent>
+#include <QWidget>
 
 #include <vic/ratman/decorated_terrain_view.hpp>
 #include <vic/ratman/qgl_scene_view.hpp>
@@ -30,8 +37,6 @@
 #include "Icons/close_hand.xpm"
 #include "Icons/open_hand.xpm"
 #include "Icons/rot_3d.xpm"
-#include <QMouseEvent>
-
 #include <sl/clock.hpp>
 
 #ifdef _WIN32
@@ -106,13 +111,11 @@ namespace ratman {
     point3d_t p0_constrained_uvh = point3d_t(sl::median(p0_ground_uvh[0], min_u, max_u),
 					     sl::median(p0_ground_uvh[1], min_v, max_v),
 					     p0_ground_uvh[2]);
-    bool constrained_ground = false;
     if (!p0_constrained_uvh.is_epsilon_equal(p0_ground_uvh, 0.0001)) {
       //      std::cerr << "constrained " << p0_constrained_uvh[0] << " " << p0_constrained_uvh[1] << " " << p0_constrained_uvh[2] << " "
       //		<<  p0_ground_uvh[0] << " " << p0_ground_uvh[1] << " " << p0_ground_uvh[2] << " " << std::endl;
       point3d_t p0_constrained_xyz = uvh_xyz_transform()->xyz_from_uvh(p0_constrained_uvh);
       result.move_ground_position_to_xyz(p0_constrained_xyz);
-      constrained_ground = true;
       //      std::cerr << "ground constraint from " << p0_ground_uvh[0] << ", " << p0_ground_uvh[1] << ", " << p0_ground_uvh[2] << " TO " << p0_constrained_uvh[0] << ", " << p0_constrained_uvh[1] << ", " << p0_constrained_uvh[2] 
       //		<< " XYZ POS " << result.position_xyz()[0] << ", " << result.position_xyz()[1] << ", " << result.position_xyz()[2] << std::endl;
     }

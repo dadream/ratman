@@ -11,9 +11,9 @@
 //   in the file LICENSE included in the packaging of this file.
 //
 //   CRS4 reserves all rights not expressly granted herein.
-//  
-//   This file is provided AS IS with NO WARRANTY OF ANY KIND, 
-//   INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS 
+//
+//   This file is provided AS IS with NO WARRANTY OF ANY KIND,
+//   INCLUDING THE WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS
 //   FOR A PARTICULAR PURPOSE.
 //
 //======================================================================
@@ -29,7 +29,7 @@
 #include <cassert>
 
 namespace ratman {
-  
+
   terrain_renderable::terrain_renderable(decorated_terrain_view* scene,
 					 cbdam::terrain_model* model) :
     active_renderable(scene)
@@ -42,11 +42,11 @@ namespace ratman {
 
     first_frame_ = true;
   }
-      
+
   terrain_renderable::~terrain_renderable() {
     if (renderer_) delete renderer_;
   }
-            
+
   const cbdam::terrain_model* terrain_renderable::model() const {
     return model_;
   }
@@ -74,7 +74,7 @@ namespace ratman {
     // mutex_.unlock();
     return result;
   }
-    
+
   void terrain_renderable::render_self(qgl_scene_view& /*qgl*/,
 				       occupancy_map_t& /*occupancy_map*/,
 				       const projective_map3d_t& P,
@@ -84,7 +84,7 @@ namespace ratman {
       // -- No data
       QString msg = QApplication::tr("Unable to connect to terrain model server");
       QMessageBox::critical( 0, QApplication::tr("Graphics error" ), msg, QMessageBox::Abort,0 );
-      qFatal(qPrintable(msg));	      
+      qFatal("%s", qPrintable(msg));
     } else {
       // Init OpenGL
       if (first_frame_) {
@@ -94,7 +94,7 @@ namespace ratman {
 	if (!renderer_->is_opengl_supported()) {
 	  QString msg = QApplication::tr("OpenGL failed to initialized. Your graphics board or driver is not capable to run this software.");
 	  QMessageBox::critical( 0, QApplication::tr("Graphics error" ), msg, QMessageBox::Abort,0 );
-	  qFatal(qPrintable(msg));	      
+	  qFatal("%s", qPrintable(msg));
 	}
       }
 
@@ -113,13 +113,13 @@ namespace ratman {
     // Mark not first frame
     first_frame_ = false;
   }
-            
+
   void terrain_renderable::async_update_self(const projective_map3d_t& /*P*/,
 					     const rigid_body_map3d_t& /*V*/,
 					     const point3d_t& /*G*/) {
     // Nothing to do
   }
- 
+
   void terrain_renderable::set_shading_enabled(bool x) {
     renderer_->set_shading_enabled(x);
   }

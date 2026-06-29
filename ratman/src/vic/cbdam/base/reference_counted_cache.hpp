@@ -273,8 +273,9 @@ namespace cbdam {
 	// set new data in cache
 	it->second = data;
       } else {
-	std::pair<map_iterator_t, bool> pair_it = cache_.insert(std::pair<key_t,data_t*>(k, data));
-	assert(pair_it.second);
+	const bool inserted = cache_.insert(std::pair<key_t,data_t*>(k, data)).second;
+	assert(inserted);
+	(void)inserted;
       }
     }
 

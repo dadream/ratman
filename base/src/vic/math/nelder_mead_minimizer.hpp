@@ -154,10 +154,10 @@ namespace vic {
       void simplex_step() {
 	std::size_t N = this->arg_dimension();
 
-	int ilo = 1;
-	int ihi = (simplex_energy_[1-1] > simplex_energy_[2-1]) ? (1) : (2);
-	int inhi= (simplex_energy_[1-1] > simplex_energy_[2-1]) ? (2) : (1);
-	for (int i = 1; i <= N+1; ++i) {
+	std::size_t ilo = 1;
+	std::size_t ihi = (simplex_energy_[1-1] > simplex_energy_[2-1]) ? (1) : (2);
+	std::size_t inhi= (simplex_energy_[1-1] > simplex_energy_[2-1]) ? (2) : (1);
+	for (std::size_t i = 1; i <= N+1; ++i) {
 	  if (simplex_energy_[i-1] < simplex_energy_[ilo-1]) {
 	    ilo = i;
 	  }

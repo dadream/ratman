@@ -55,10 +55,9 @@ void qgl_window_base::paintGL(){
 
 /// resize the window setting up a pre-defined view-frustum
 void qgl_window_base::resizeGL( int w, int h ){
-  float aspect_ratio, dim, p_near, p_far;
+  float aspect_ratio, p_near, p_far;
   aspect_ratio = ( h==0 ) ? 1 :  ((float)w / (float)h);
   p_near = 0.2f;
-  dim = p_near;
   p_far = 500;
   glViewport( 0, 0, (GLint)w, (GLint)h );
   glMatrixMode( GL_PROJECTION ); 

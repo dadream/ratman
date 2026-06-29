@@ -22,7 +22,8 @@
 #define RATMAN_XML_HANDLER_HPP
 #include <GL/glew.h>
 #include <QApplication>
-#include <QtGui>
+#include <QString>
+#include <QWidget>
 #include <QXmlDefaultHandler>
 #include <QXmlSimpleReader>
 #include <iostream>
@@ -31,8 +32,6 @@
 #include <vic/cbdam/base/compressed_rgba32_image.hpp>
 #include <stack>
 #include <vector>
-#include <QWidget>
-
 
 namespace ratman {
 

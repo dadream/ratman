@@ -1,5 +1,5 @@
 /* XPM */
-static char * bkg_xpm[] = {
+static const char * bkg_xpm[] = {
 "64 64 2 1",
 " 	c None",
 ".	c #FFFFFF",

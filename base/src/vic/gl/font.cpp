@@ -350,8 +350,6 @@ namespace vic {
       begin();
       {
         const float uconv = float(character_dx_)/float(texture_dx_);
-        const float vconv = float(character_dy_)/float(texture_dy_);
-        const float fx = character_fixed_width_;
         const float fy = character_fixed_height_;
         const float y0 = 0.0f;
         const float y1 = scale_y_;

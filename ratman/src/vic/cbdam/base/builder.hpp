@@ -379,7 +379,10 @@ namespace cbdam {
     /*
      * Initialize diamond graph
      */
-    if (diamond_graph_) delete diamond_graph_; diamond_graph_ = 0;
+    if (diamond_graph_) {
+      delete diamond_graph_;
+    }
+    diamond_graph_ = 0;
 
     /*
      * Parameterize and open repos
@@ -413,7 +416,10 @@ namespace cbdam {
     main_progress_report_end();
 
     std::cerr << "Deleting diamond graph structure..." << std::endl;
-    if (diamond_graph_) delete diamond_graph_; diamond_graph_ = 0;
+    if (diamond_graph_) {
+      delete diamond_graph_;
+    }
+    diamond_graph_ = 0;
 
     // Close all repos
     std::cerr << "Closing all open repositories..." << std::endl;
@@ -443,7 +449,10 @@ namespace cbdam {
     std::cerr << "Building diamond graph" << std::endl;
     std::cerr << "---------------------------------------------------------------------------" << std::endl;
     
-    if (diamond_graph_) delete diamond_graph_; diamond_graph_ = 0;
+    if (diamond_graph_) {
+      delete diamond_graph_;
+    }
+    diamond_graph_ = 0;
 
     diamond_graph_builder_t gb;
     diamond_graph_ = gb.new_diamond_graph(tmp_graph_name(),
@@ -516,7 +525,6 @@ namespace cbdam {
          ++cdiamond_it) {
       if ((cdiamond_count % sampled_leaf_interval) == 0) {
         const diamond_t         x    = cdiamond_it->first;
-        const diamond_id_t      x_id = x.id();
 
         array2_t p(N+1, N+1);
         array2_t q(N, N);

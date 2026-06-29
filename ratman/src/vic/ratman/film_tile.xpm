@@ -1,5 +1,5 @@
 /* XPM */
-char * film_tile_xpm[] = {
+const char * film_tile_xpm[] = {
 "128 128 28 1",
 " 	c None",
 ".	c #432A22",

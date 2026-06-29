@@ -1,5 +1,5 @@
 /* XPM */
-static char * bkn_s_xpm[] = {
+static const char * bkn_s_xpm[] = {
 "40 25 279 2",
 "  	c #FFFFFF",
 ". 	c #FFFEFB",

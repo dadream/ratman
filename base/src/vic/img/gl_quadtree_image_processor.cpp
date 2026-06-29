@@ -128,7 +128,7 @@ namespace vic {
 	  for (int c=0; c<dnc; ++c) {
 	    dst_ptr[c] += (((int(src_ptr[c])-int(dst_ptr[c])) * src_a + (1<<7)) >> 8);
 	  }
-	  dst_ptr[aidx] = (255 - ((256 - src_a) * (255 - dst_ptr[aidx]) + (1<<9)-1) >> 8);
+	  dst_ptr[aidx] = (255 - ((256 - src_a) * (255 - dst_ptr[aidx]) + (1<<9)-1)) >> 8;
 	  src_ptr += snc;
 	  dst_ptr += dnc;
 	}

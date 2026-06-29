@@ -18,6 +18,8 @@
 //
 //======================================================================
 //---HDR---//
+#include <stdint.h>
+
 #ifdef _WIN32
 #include <windows.h>
 #undef min
@@ -645,11 +647,11 @@ namespace cbdam {
       vbo_bind_buffer(vbo_desc.id());
       glVertexPointer(3, GL_FLOAT, 0, (const GLvoid*)0);
       if (use_normal_) {
-        glNormalPointer(GL_FLOAT, 0, (const GLvoid*)data_size_);
+        glNormalPointer(GL_FLOAT, 0, reinterpret_cast<const GLvoid*>(static_cast<uintptr_t>(data_size_)));
       }
       if (!geo_xform_->is_planar() && elevation_map_enabled_) {
-	uint32_t offset = data_size_ + (use_normal_? normal_size_ : 0);
-        glTexCoordPointer(1, GL_FLOAT, 0,  (const GLvoid*)offset);
+	uintptr_t offset = static_cast<uintptr_t>(data_size_) + (use_normal_? normal_size_ : 0);
+        glTexCoordPointer(1, GL_FLOAT, 0,  reinterpret_cast<const GLvoid*>(offset));
       }
       
       if (use_color_) {

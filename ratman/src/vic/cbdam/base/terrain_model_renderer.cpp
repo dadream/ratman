@@ -39,6 +39,8 @@
 namespace cbdam {
 
   terrain_model_renderer::terrain_model_renderer(terrain_model* tm) :
+    cached_data_renderer_(0),
+    owns_renderer_(false),
     terrain_model_(tm) {
 #ifndef CBDAM_NO_OPENGL
     cached_data_renderer_ = new opengl_cached_data_renderer();
@@ -57,7 +59,7 @@ namespace cbdam {
   }
 
   terrain_model_renderer::terrain_model_renderer(terrain_model* tm, cached_data_renderer* r) :
-    terrain_model_(tm), cached_data_renderer_(r), owns_renderer_(false) {
+    cached_data_renderer_(r), owns_renderer_(false), terrain_model_(tm) {
     focus_fraction_ = 1.0;
     screen_tolerance_ = 0.1;
     wireframe_enabled_ = false;

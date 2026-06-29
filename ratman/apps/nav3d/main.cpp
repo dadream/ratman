@@ -21,7 +21,7 @@
 #include <GL/glew.h>
 #include <QApplication>
 #include <QProcess>
-#include <QtOpenGL>
+#include <QGLFormat>
 #include <QBuffer>
 #include <QByteArray>
 #include <QMessageBox>
@@ -66,7 +66,6 @@ int main(int argc, char *argv[]) {
   std::string s3d_url;
   double lon=-1000.0;
   double lat=-1000.0;
-  bool lonlat_req=false;
   for (int i=1; i<argc; ++i) {
     std::string arg = std::string(argv[i]);
     if (arg == "--help") {
@@ -84,31 +83,30 @@ int main(int argc, char *argv[]) {
        ++i; if (i==argc) {
 	QString msg = QApplication::tr("Missing command line parameter after '--home-url'");
 	QMessageBox::critical( 0, QApplication::tr("Load error" ), msg, QMessageBox::Abort,0 );
-	qFatal(qPrintable(msg));
+	qFatal("%s", qPrintable(msg));
       }
       filename = std::string(argv[i]);
     } else if (arg == "--lonlat") {
       ++i; if (i==argc) {
 	QString msg = QApplication::tr("Missing command line parameter '--lonlat'");
 	QMessageBox::critical( 0, QApplication::tr("Load error" ), msg, QMessageBox::Abort,0 );
-	qFatal(qPrintable(msg));
+	qFatal("%s", qPrintable(msg));
       }
       if (sscanf(argv[i], "%lf", &lon) != 1) {
 	QString msg = QApplication::tr("Longitude is not a number");
 	QMessageBox::critical( 0, QApplication::tr("Load error" ), msg, QMessageBox::Abort,0 );
-	qFatal(qPrintable(msg));
+	qFatal("%s", qPrintable(msg));
       }
       ++i; if (i==argc) {
 	QString msg = QApplication::tr("Missing command line parameter");
 	QMessageBox::critical( 0, QApplication::tr("Load error" ), msg, QMessageBox::Abort,0 );
-	qFatal(qPrintable(msg));
+	qFatal("%s", qPrintable(msg));
       }
       if (sscanf(argv[i], "%lf", &lat) != 1) {
 	QString msg = QApplication::tr("Latitude is not a number");
 	QMessageBox::critical( 0, QApplication::tr("Load error" ), msg, QMessageBox::Abort,0 );
-	qFatal(qPrintable(msg));
+	qFatal("%s", qPrintable(msg));
       }
-      lonlat_req=true;
     } else if (arg == "--version") {
       std::cout << "RATMAN 3D - " << ratman::version::author_str() << std::endl;
       std::cout << "Version: " << ratman::version::version_str() 
@@ -181,7 +179,7 @@ int main(int argc, char *argv[]) {
   if ( !QGLFormat::hasOpenGL() )  {
     QString msg = QApplication::tr("OpenGL not supported on this system. Unable to run application.");
     QMessageBox::critical( 0, QApplication::tr("Graphics error" ), msg, QMessageBox::Abort,0 );
-    qFatal(qPrintable(msg));
+    qFatal("%s", qPrintable(msg));
   }
 
   ////////////// LOAD
@@ -200,7 +198,7 @@ int main(int argc, char *argv[]) {
   if (!ifile) {
     QString msg = QApplication::tr("Failed to open '%1'").arg(QString::fromLatin1(filename.c_str()));
     QMessageBox::critical( 0, QApplication::tr("Load error" ), msg, QMessageBox::Abort,0 );
-    qFatal(qPrintable(msg));
+    qFatal("%s", qPrintable(msg));
   } else {
     progress.setValue(10); // signal loaded
     while (ifile.good()) {
@@ -225,7 +223,7 @@ int main(int argc, char *argv[]) {
     if (ifile.fail() &&!ifile.eof()) {
       QString msg = QApplication::tr("Failed to read '%1'").arg(filename.c_str());      
       QMessageBox::critical( 0, QApplication::tr("Load error" ), msg, QMessageBox::Abort,0 );
-      qFatal(qPrintable(msg));
+      qFatal("%s", qPrintable(msg));
     }
     ifile.close();
   }
@@ -233,7 +231,7 @@ int main(int argc, char *argv[]) {
   if (data.isEmpty()) {
     QString msg = QApplication::tr("Failed to read '%1'").arg(filename.c_str());
     QMessageBox::critical( 0, QApplication::tr("Load error" ), msg, QMessageBox::Abort,0 );
-    qFatal(qPrintable(msg));
+    qFatal("%s", qPrintable(msg));
   }
 
 
@@ -276,7 +274,7 @@ int main(int argc, char *argv[]) {
     // parse error
     QString msg = QApplication::tr("Parse error: malformed input file '%1'").arg(filename.c_str());
     QMessageBox::critical( 0, QApplication::tr("Load error" ), msg, QMessageBox::Abort,0 );
-    qFatal(qPrintable(msg));
+    qFatal("%s", qPrintable(msg));
     return 1;
   }  
 }

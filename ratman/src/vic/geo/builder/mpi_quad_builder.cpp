@@ -583,13 +583,11 @@ namespace vic {
       bool aborted = false;
       while (!done && !aborted) {
 
-	bool worker_init = false;
 	int worker = -1;
 	if (send_count < damaged_count && 
 	    next_unemployed_worker<int(mpi::process_count())) {
 	  worker = next_unemployed_worker;
 	  ++next_unemployed_worker;
-	  worker_init = true;
 	} else {
 	  // All workers are busy, wait
 	  int src;

@@ -145,7 +145,6 @@ namespace ratman {
     
     GLint xywh[4];
     glGetIntegerv(GL_VIEWPORT,xywh);
-    matrix4x4d_t IV = V.inverse().as_matrix();
     mutex_.lock();
     glPushAttrib(GL_ENABLE_BIT);
     {

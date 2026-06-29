@@ -20,6 +20,8 @@
 //---HDR---//
 #include <vic/cbdam/geo/map_raster_sampler.hpp>
 #include <gdal_priv.h>
+#include <algorithm>
+#include <iostream>
 
 namespace vic {
 
@@ -397,13 +399,19 @@ namespace vic {
 #if 1
 	// FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// Read raster and convert to int32 format
-        dataset_->RasterIO(GF_Read, 
+        CPLErr raster_status = dataset_->RasterIO(GF_Read,
 			   start_x, start_y, count_x, count_y,
                            matrix, count_x, count_y, GDT_Int32,
                            dataset_band_count_, NULL,
                            dataset_band_count_ * sizeof(int32_t),                         // pixel space
                            cache_tile_width_ * dataset_band_count_ * sizeof(int32_t),     // line space
                            sizeof(int32_t));                                              // band space
+        if (raster_status != CE_None) {
+          std::cerr << "GDAL RasterIO failed while loading CBDAM sampler cache tile" << std::endl;
+          std::fill(matrix,
+                    matrix + cache_tile_width_ * cache_tile_height_ * dataset_band_count_,
+                    int32_t(0));
+        }
 #endif
       }
     }

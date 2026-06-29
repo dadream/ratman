@@ -298,7 +298,6 @@ namespace ratman {
     point3d_t    camera_eye = point3d_t(IV(0,3), IV(1,3), IV(2,3));
     vector3d_t   camera_x   = vector3d_t(IV(0,0), IV(0,1), IV(0,2)).ok_normalized();
     vector3d_t   camera_y   = vector3d_t(IV(1,0), IV(1,1), IV(1,2)).ok_normalized();
-    vector3d_t   camera_z   = vector3d_t(IV(2,0), IV(2,1), IV(2,2)).ok_normalized();
     vector3d_t   b_up    = camera_y;
     vector3d_t   b_right = camera_x;
     vector3d_t   b_look  = b_right.cross(b_up);

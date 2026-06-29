@@ -30,6 +30,7 @@
 
 // GDAL include
 #include <ogr_spatialref.h>
+#include <cpl_conv.h>
 
 namespace vic {
   namespace geo {
@@ -43,7 +44,7 @@ namespace vic {
       if (sr.SetFromUserInput(proj.c_str()) == OGRERR_NONE) {
 	sr.exportToWkt(&wkt);
 	result = std::string(wkt);
-	OGRFree(wkt);
+	CPLFree(wkt);
       }      
       return result;
     }

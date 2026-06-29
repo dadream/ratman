@@ -20,8 +20,20 @@
 //---HDR---//
 #include <GL/glew.h>
 #include "appwindow.hpp"
-#include <QtGui>
-#include <QtOpenGL>
+#include <QAction>
+#include <QCloseEvent>
+#include <QCursor>
+#include <QImage>
+#include <QPainter>
+#include <QPixmap>
+#include <QSize>
+#include <QString>
+#include <QStringList>
+#include <QTreeWidget>
+#include <QTreeWidgetItem>
+#include <QVBoxLayout>
+#include <QWidget>
+
 #include <QRadioButton>
 #include <QCheckBox>
 #include <QFileDialog>

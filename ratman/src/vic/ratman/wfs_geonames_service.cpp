@@ -93,7 +93,7 @@ namespace ratman {
       QDomNodeList element_list = docElem.elementsByTagName(feature_tag_.c_str());
 
       SL_TRACE_OUT(1) << " ======== PARSING " << element_list.length() << " FNAMES" << std::endl;
-      for (std::size_t i=0; i < element_list.length(); ++i){
+      for (int i=0; i < element_list.length(); ++i){
 	QDomNode poiNode = element_list.item(i);
 	QDomElement poiElement = poiNode.toElement();
 

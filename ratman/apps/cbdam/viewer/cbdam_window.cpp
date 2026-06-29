@@ -19,7 +19,7 @@
 //======================================================================
 //---HDR---//
 #include "cbdam_window.hpp"
-#include <QtGui>
+#include <QWidget>
 
 /* 
  *  Constructs a cbdam_window which is a child of 'parent', with the 

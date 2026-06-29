@@ -134,22 +134,6 @@ namespace mod_victms {
   }
 
 
-  static int request_get_arg( request_rec *r, char const *opt ) {
-    char buffer[128] = "", *inptr, *outptr = buffer;
-  
-    if ( ( inptr = strstr( r->args, opt ) ) == NULL )
-      return 0;
-    
-    inptr += strlen(opt);
-    while ( *inptr != '&' && *inptr != '\0' )
-      *outptr++ = *inptr++;
-    *outptr++ = '\0';
-    
-    if ( strlen(buffer) == 0 )
-      return 1;
-    
-    return atoi( buffer );
-  }
 
   static std::string request_get_file_name( request_rec *r ) {
     std::string result=std::string(r->filename);
@@ -180,33 +164,6 @@ namespace mod_victms {
     fprintf( stderr, "\n" );
     r->content_type = "text/html";
     ap_rprintf(r, "<HTML><BODY>Error: %s</BODY></HTML>", msg);
-  }
-
-  static void send_debug_info(request_rec *r) {
-    const char* hostname;
-  
-    r->content_type = "text/html";
-    hostname = ap_get_remote_host(r->connection, 
-				  r->per_dir_config, REMOTE_NAME, 0);
-
-    ap_rputs("<HTML>\n", r);
-    ap_rputs("<HEADER>\n", r);
-    ap_rputs("<TITLE>CRS4 Victms Apache mod debug output</TITLE>\n", r);
-    ap_rputs("</HEADER>\n", r);
-    ap_rputs("<BODY>\n", r);
-    ap_rprintf(r, "<H1>CRS4 Victms Apache mod debug output</H1>\n");
-    ap_rprintf(r, "<p><PRE>\n");
-    ap_rprintf(r, "Server pid   = %d\n", getpid());
-    ap_rprintf(r, "\n");
-    ap_rprintf(r, "unparsed_uri = %s\n", r->unparsed_uri);
-    ap_rprintf(r, "uri          = %s\n", r->uri);
-    ap_rprintf(r, "filename     = %s\n", r->filename);
-    ap_rprintf(r, "path_info    = %s\n", r->path_info);
-    ap_rprintf(r, "args         = %s\n\n", r->args);
-    ap_rprintf(r, "hostname     = %s\n\n", hostname);
-    ap_rprintf(r, "\n");
-    ap_rputs("</PRE></BODY>\n", r);
-    ap_rputs("</HTML>\n", r);
   }
 
   static std::string root_url(request_rec* r) {

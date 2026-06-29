@@ -1,5 +1,5 @@
 /* XPM */
-static char * sct_s_xpm[] = {
+static const char * sct_s_xpm[] = {
 "40 25 338 2",
 "  	c #FFFFFF",
 ". 	c #FFFFFE",

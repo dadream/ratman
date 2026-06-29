@@ -247,28 +247,8 @@ namespace ratman {
 
   void terrain_tile_meteo::async_update_render_placemarks_candidates_in(std::vector<placemark_render_data_t>& candidates,
 									const projective_map3d_t& /*P*/,
-									const rigid_body_map3d_t& V,
-									const point3d_t& G) {
-    matrix4x4d_t IV = V.inverse().as_matrix();
-    point3d_t    eye_xyz = point3d_t(IV(0,3), IV(1,3), IV(2,3));
-    point3d_t    lookat_xyz = G;
-    point3d_t    lookat_WGS84_lonlat = scene()->terrain_layer()->model()->WGS84_lonlat_from_xyz(lookat_xyz);
-
-    double       lookat_distance = eye_xyz.distance_to(lookat_xyz);
-    const double R = 6370000; // FIXME Hardcoded Earth radius - to make it work also for planar 
-
-    double lookat_tile_width = 0.0;
-    double factor = lookat_distance / R;
-    if (factor < 1.0) {
-      lookat_tile_width = std::max(0.01, rad2deg(std::abs(std::asin(factor)*2.0)));
-    } else {
-      lookat_tile_width = 180.0;
-    }
-
-    double lookat_lon0 = lookat_WGS84_lonlat[0]-lookat_tile_width;
-    double lookat_lon1 = lookat_WGS84_lonlat[0]+lookat_tile_width;
-    double lookat_lat0 = lookat_WGS84_lonlat[1]-lookat_tile_width;
-    double lookat_lat1 = lookat_WGS84_lonlat[1]+lookat_tile_width;
+									const rigid_body_map3d_t& /*V*/,
+									const point3d_t& /*G*/) {
 
     for(std::size_t i=0; i<station_placemarks_.size(); ++i) {
       candidates.push_back(station_placemarks_[i]);

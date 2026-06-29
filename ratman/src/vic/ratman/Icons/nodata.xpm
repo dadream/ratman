@@ -1,5 +1,5 @@
 /* XPM */
-static char * nodata_xpm[] = {
+static const char * nodata_xpm[] = {
 "64 64 229 2",
 "  	c None",
 ". 	c #FFFFFF",
